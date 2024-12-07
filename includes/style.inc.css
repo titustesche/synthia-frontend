@@ -1,0 +1,315 @@
+@import url('https://fonts.googleapis.com/css2?family=Moderustic:wght@300..800&display=swap');
+
+:root {
+    --outline-shape: #0EE1DAFF;
+    --font: "Moderustic", sans-serif;
+    --text-color: rgba(255, 255, 255, 1);
+}
+
+html {
+    font-family: sans-serif;
+    font-family: var(--font);
+    font-size: 110%;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(ellipse at center, #3c3c3c 0%, #000000 100%);
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: 5s pulse infinite ease-in-out;
+}
+
+.container {
+    width: 95vw;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+        'header header'
+        'sidebar main';
+    height: 93vh;
+    gap: 1rem;
+}
+
+.header, .sidebar, .main {
+    background-color: rgba(223, 223, 223, 0.02);
+    backdrop-filter: blur(10px);
+    color: var(--text-color);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    text-align: justify;
+    line-height: 150%;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    transition: backdrop-filter .2s;
+    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.1);
+}
+
+.header:hover, .sidebar:hover, .main:hover {
+    backdrop-filter: blur(7px);
+    transition: backdrop-filter .2s;
+}
+
+.header {
+    grid-area: header;
+    height: 7vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    font-size: 200%;
+}
+.header div {
+    width: fit-content;
+}
+
+.sidebar {
+    grid-area: sidebar;
+    width: 15vw;
+    height: 100%;
+}
+
+.main {
+    grid-area: main;
+}
+
+#chatbox {
+    width: 95%;
+    margin: auto;
+    height: auto;
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: scroll;
+}
+
+#chatbox::-webkit-scrollbar {
+    display: none;
+}
+
+@property --angle{
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+#ui_wrapper {
+    display: flex;
+    justify-content: space-between;
+    background-color: #474747;
+    color: white;
+    border-radius: 15px;
+    border: 1px solid grey;
+    border-right: none;
+    position: relative;
+    bottom: 0;
+    left: 0;
+    margin: 0 20px 20px 20px;
+}
+
+#ui_wrapper button {
+    border-radius: 0 15px 15px 0;
+    border: none;
+    border-right: 1px solid grey;
+    background-color: transparent;
+    font-size: 25px;
+    height: 100%;
+    color: white;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#send_svg_path {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    transform: scale(1.4);
+}
+
+.conversation {
+    height: fit-content;
+    padding: 0.5rem;
+    margin: 0.7rem;
+    border-radius: 15px;
+    cursor: pointer;
+    position: relative;
+}
+
+.conversation::before, .conversation::after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: inherit;
+    z-index: -1;
+    transition: .2s;
+}
+
+.conversation::before {
+
+}
+
+.conversation::after {
+    background: rgba(83, 83, 83, 0.07);
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.18);
+
+}
+
+.conversation:hover::before, .conversation[active="true"]::before {
+    filter: blur(5px);
+    background-image: repeating-linear-gradient(90deg, #ff5e00, #ff00ff, blue);
+}
+
+
+
+@keyframes border-effect {
+    from {
+        --angle: 0deg;
+    }
+
+    to {
+        --angle: 360deg;
+    }
+}
+
+#query {
+    width: 100%;
+    font-family: sans-serif;
+    font-size: 100%;
+    resize: none;
+    overflow: visible;
+    background-color: transparent;
+    border: none;
+    color: white;
+    outline: none;
+    margin: 15px 0 15px 15px;
+}
+
+.msg_assistant, .msg_user {
+    font-size: 105%;
+    width: fit-content;
+    max-width: 40%;
+    height: fit-content;
+    position: relative;
+    border-radius: 10px;
+    padding: 0 10px 10px 10px;
+    white-space: pre-wrap;
+    border: 1px solid grey;
+    margin: 0.5rem;
+    line-height: 110%;
+}
+
+.msg_user {
+    overflow: visible;
+    margin: 0.5rem 0 0.5rem auto;
+    white-space: pre-wrap;
+}
+
+.msg_assistant::before, .msg_user::before {
+    z-index: -1;
+    background: linear-gradient(-45deg, #272727, #474747);
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: inherit;
+}
+
+.msg_assistant[outline="true"]::after, .msg_user[outline="true"]::after {
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: inherit;
+    background-image: conic-gradient(from var(--angle), transparent, var(--outline-shape, red));
+    z-index: -2;
+    padding: 3px;
+    font-size: 100%;
+    animation: linear border-effect 2s infinite;
+}
+
+.message-header {
+    padding: 0.25rem 0 0.25rem 0;
+    margin: 0.25rem 0 0.5rem 0;
+    border-bottom: 1px solid white;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    width: fit-content;
+}
+
+.pyout {
+    background-color: black;
+    color: #bfbfbf;
+    font-family: "Source Code Pro", monospace;
+    line-height: 110%;
+    font-size: 90%;
+    border-radius: 5px;
+    padding: 0;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 15em;
+    border: 1px solid #808080;
+    overflow: hidden;
+    display: block;
+}
+
+.pyout_result {
+    margin: 5px 0 5px 10px;
+    max-height: 150px;
+    overflow-y: scroll;
+    text-align: left;
+}
+
+.pyout_result[textCursor="true"]::after  {
+    content: "";
+    width: 7px;
+    height: 12px;
+    background: #bfbfbf;
+    display: inline-block;
+    animation: 1s blink infinite step-end;
+}
+
+@keyframes blink {
+    0% {
+        background: black;
+    }
+
+    50% {
+        background: #bfbfbf;
+    }
+}
+
+
+.pyout_header {
+    margin: 0;
+    padding: 5px;
+    background-color: #191919;
+    width: 100%;
+    font-size: 70%;
+}
+
+.pyout_code {
+    margin: 0;
+    padding: 5px;
+    letter-spacing: 0;
+    font-size: 70%;
+}
