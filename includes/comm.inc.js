@@ -16,9 +16,28 @@ function encodeImageFile(element) {
 async function Request()
 {
     const textarea = document.getElementById("query");
+
+    // Add the message to the "messageObjects" object
+    try
+    {
+        messageObjects.push({"role": "user", "content": query, "images": [reader.result.split(',')[1]]});
+    }
+    catch
+    {
+        messageObjects.push({"role": "user", "content": query});
+    }
+
+    // Retrieve that messageObjects container element
+    messageElements.push(new Message("user"));
+    messageElements[messageElements.length - 1].pushText(textarea.value);
+    activeMessage = new Message("assistant");
+    messageElements.push(activeMessage);
+    activeMessage.outline = true;
+    activeMessage.outlineShape = 'transparent, #00d0ff';
+
     let body = {
         url: "http://localhost:11434/api/chat",
-        model: "qwen2.5-coder:14b",
+        model: "deepseek-r1:14b",
         role: "user",
         query: textarea.value,
         images: []
@@ -31,8 +50,10 @@ async function Request()
             },
         body: JSON.stringify(body),
     }
-    
-    fetch('http://localhost:3000/chat/1', options)
+
+    textarea.value = "";
+
+    fetch(`http://localhost:3000/chat/${activeConversation.id}`, options)
         .then(response => response.body)
         .then(rb => {
             const reader = rb.getReader();
@@ -44,12 +65,75 @@ async function Request()
                             // Close connection if done is set to true
                             if (done) {
                                 controller.close();
+                                activeMessage.outline = false;
                                 return;
                             }
                             // Fetch the individual words
                             await controller.enqueue(value);
-                            let json = JSON.parse(new TextDecoder().decode(value));
-                            console.log(json);
+                            let chunk = new TextDecoder().decode(value);
+
+                            try {
+                                let json = JSON.parse(chunk);
+                                let type = json.type;
+                                let content = json.data;
+
+                                console.log(typeof content);
+
+                                switch (type) {
+                                    case "think":
+                                        if (content.length <= 0) {
+                                            console.log("Undefined content received");
+                                            break;
+                                        }
+
+                                        await (async () => {
+                                            for (let char of content) {
+                                                activeMessage.pushThought(char);
+                                                await new Promise(function (resolve) {
+                                                    setTimeout(resolve, 20);
+                                                });
+                                            }
+                                        })();
+                                        break;
+
+                                    case "text":
+                                        if (!content) {
+                                            console.log("Undefined content received");
+                                            break;
+                                        }
+
+                                        await (async () => {
+                                            for (let char of content) {
+                                                activeMessage.pushText(char);
+                                                await new Promise(function (resolve) {
+                                                    setTimeout(resolve, 20);
+                                                });
+                                            }
+                                        })();
+                                        break;
+
+                                    case "script":
+                                        if (!content) {
+                                            console.log("Undefined content received");
+                                            break;
+                                        }
+
+                                        await (async () => {
+                                            for (let char of content) {
+                                                activeMessage.pushText(char);
+                                                await new Promise(function (resolve) {
+                                                    setTimeout(resolve, 20);
+                                                });
+                                            }
+                                        })();
+                                        break;
+                                }
+                            }
+
+                            catch (e) {
+                                console.log(`An error occurred: ${e}, Chunk: ${chunk}`);
+                            }
+
                             push();
                         });
                     }
@@ -68,6 +152,7 @@ async function Request()
 // Triggers when the user sends their message
 // Also warning, this is one monster of a function and changing it could even affect the backend
 // Change with care and consult the Documentary that does not exist yet
+/* Deprecated
 async function sendRequest(role, query) {
     query = role === "system" ? query : textarea.value;
     // For debugging purposes
@@ -218,6 +303,7 @@ async function sendRequest(role, query) {
             }
         });
 }
+ */
 
 // This function handles communication with the backend
 async function sendAction(code) {
@@ -337,9 +423,6 @@ async function sendAction(code) {
             messageObjects.push({"role": "assistant", "content": aiMessage});
             messageObjects.push({"role": "system", "content": textResult});
             
-            // Save the system message in the database
-            saveMessage("system", textResult, activeConversation.id);
-            
             // Feed the output of that request back to the AI for validation (can lead to never ending loops)
             sendRequest("system", textResult);
         })
@@ -372,6 +455,7 @@ async function generateConversations() {
 }
 
 // Save a message to the database
+/* Deprecated
 async function saveMessage(role, message, conversationId) {
     let url = `http://localhost:3000/message/${conversationId}`;
     let requestOptions = {
@@ -385,6 +469,7 @@ async function saveMessage(role, message, conversationId) {
     await fetch(url, requestOptions)
         .then(res => res.json());
 }
+ */
 
 // Requests all messages of a conversation from the backend
 async function getMessages(id) {
