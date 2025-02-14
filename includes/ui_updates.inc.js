@@ -21,6 +21,10 @@ class Conversation {
 
 // Class to represent Messages - Todo: Add a way to interact with individual elements inside the message
 class Message {
+    // Thinking portion of the message
+    thoughtContainer;
+    thoughts;
+    visibleThoughts = false;
     // Content of the message for in program usage
     content;
     // The role as a string
@@ -66,8 +70,6 @@ class Message {
         this.header.setAttribute("class", "message-header");
         // Associate roles with their names and Print in Header
         this.createHeader();
-        this.body = this.object.appendChild(document.createElement("div"));
-        this.body.setAttribute("class", "message-body");
 
         this._outline = false;
         this._outlineShape = "#ffffffff";
@@ -172,11 +174,52 @@ class Message {
                 break;
         }
     }
-    
+
+    updateThoughtContainer() {
+        // Can be called like that because this method is only ever called after the thoughtContainer was initiated
+        if (!this.visibleThoughts) {
+            this.thoughtContainer.innerHTML = "Thinking...";
+            return;
+        }
+
+        this.thoughtContainer.innerHTML = this.thoughts;
+    }
+
+    pushThought(text) {
+        if (!this.thoughtContainer) {
+            this.thoughtContainer = this.object.appendChild(document.createElement("div"));
+            this.thoughtContainer.className = `thought_container`;
+            this.thoughtContainer.addEventListener("click", () => {
+                this.visibleThoughts = !this.visibleThoughts;
+                this.updateThoughtContainer();
+                updateScroll();
+            });
+            this.updateThoughtContainer();
+            // Todo: This currently just counteracts the \n beginning, find solution in backend
+            updateScroll();
+            this.thoughts += text;
+            return;
+        }
+        updateScroll();
+        this.thoughts += text;
+        this.updateThoughtContainer();
+    }
+
     // Add new text to the active message
     pushText(text) {
+        if (!this.body)
+        {
+            this.body = this.object.appendChild(document.createElement("div"));
+            this.body.className = `message-body`;
+            this.body.innerText += text;
+            // Todo: This currently just counteracts the \n beginning, find solution in backend
+            // this.content += text;
+            updateScroll();
+            return;
+        }
         this.body.innerHTML += text;
         this.content += text;
+        updateScroll();
     }
 }
 
@@ -201,10 +244,33 @@ async function renderMessages(messages) {
         if (i !== 0) {
             if (messages[i].role !== "system") {
                 activeMessage = new Message(messages[i].role);
+                if (messages[i].role !== "user")
+                {
+                    let cleanMessage = JSON.parse(`{"blocks":${messages[i].content}}`);
+
+                    for (let block of cleanMessage.blocks) {
+                        switch(block.type) {
+                            case "think":
+                                activeMessage.pushThought(block.content);
+                                break;
+
+                            case "text":
+                                activeMessage.pushText(block.content);
+                                break;
+
+                            case "script":
+                                activeMessage.createPyout();
+                                activeMessage.pushResult(block.content);
+                                break;
+                        }
+                    }
+                    continue;
+                }
                 activeMessage.pushText(messages[i].content);
             }
             else {
                 let output = JSON.parse(messages[i].content);
+
                 activeMessage.createPyout();
                 if (output.data !== undefined) {
                     activeMessage.pushResult((output.data).replaceAll('\\n', '\n'));
@@ -258,7 +324,7 @@ async function messageOpacity(container, messages) {
 // Updates scrolling, accepts the default behaviors
 function updateScroll(force = false, behavior = 'smooth') {
     if (!force) {
-        if (chatbox.scrollHeight <= (chatbox.scrollTop + chatbox.offsetHeight*2)) {
+        if (chatbox.scrollHeight <= (chatbox.scrollTop + chatbox.offsetHeight*1.2)) {
             chatbox.scrollTo({
                 top: chatbox.scrollHeight,
                 behavior: behavior
@@ -276,19 +342,21 @@ function updateScroll(force = false, behavior = 'smooth') {
 
 // Draws the mouse highlight on selected text
 function drawMouseHighlight(element, x, y, color, backgroundColor, size) {
-    // Get ALL the dimensions and points
-    let rect = element.getBoundingClientRect();
-    let width = element.offsetWidth;
-    let height = element.offsetHeight;
-    let posX = rect.left;
-    let posY = rect.top;
+    if (element) {
+        // Get ALL the dimensions and points
+        let rect = element.getBoundingClientRect();
+        let width = element.offsetWidth;
+        let height = element.offsetHeight;
+        let posX = rect.left;
+        let posY = rect.top;
 
-    // Do some fancy looking math on them
-    let highlightX = (x - posX) / width * 100;
-    let highlightY = (y - posY) / height * 100;
+        // Do some fancy looking math on them
+        let highlightX = (x - posX) / width * 100;
+        let highlightY = (y - posY) / height * 100;
 
-    // Boom, circle!
-    element.style.backgroundClip = 'text';
-    element.style.color = 'transparent';
-    element.style.backgroundImage = `radial-gradient(circle farthest-corner at ${highlightX}% ${highlightY}%, ${color} 5px, ${backgroundColor} ${size}px`;
+        // Boom, circle!
+        element.style.backgroundClip = 'text';
+        element.style.color = 'transparent';
+        element.style.backgroundImage = `radial-gradient(circle farthest-corner at ${highlightX}% ${highlightY}%, ${color} 5px, ${backgroundColor} ${size}px`;
+    }
 }
