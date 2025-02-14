@@ -199,9 +199,9 @@ body {
 }
 
 .msg_assistant, .msg_user {
-    font-size: 105%;
+    font-size: 0.9em;
     width: fit-content;
-    max-width: 40%;
+    max-width: 60%;
     height: fit-content;
     position: relative;
     border-radius: 10px;
@@ -312,4 +312,25 @@ body {
     padding: 5px;
     letter-spacing: 0;
     font-size: 70%;
+}
+
+.thought_container {
+    font-size: 0.8em;
+    background: linear-gradient(to left, #a6a6a6, #ffffff 20%, #a6a6a6 40%);
+    background-size: 200% 200%;
+    background-clip: text;
+    color: transparent;
+    line-height: 1em;
+    animation: Animation 3s linear infinite;
+}
+
+.thought_container:hover {
+    background: white;
+    background-clip: text;
+    cursor: pointer;
+}
+
+@keyframes Animation {
+    0%{background-position:200% 0%}
+    100%{background-position:0% 0%}
 }
