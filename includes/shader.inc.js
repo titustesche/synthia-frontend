@@ -1,4 +1,11 @@
 const startTime = Date.now();
+let targetTurbulence = 0.0;
+let shaderTurbulence = 0.0;
+let shaderSpeed = 1.0;
+
+async function updateTurbulence(factor) {
+    shaderTurbulence += (targetTurbulence - shaderTurbulence) * factor;
+}
 
 async function initWebGL() {
     const canvas = document.getElementById('shader_canvas');
@@ -49,18 +56,33 @@ async function initWebGL() {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
     // Zeichne das Quad
-    // const centerUniform = gl.getUniformLocation(program, 'center');
-    const resolution = gl.getUniformLocation(program, 'u_resolution');
-    // const sizeUniform = gl.getUniformLocation(program, 'size');
-    // updatePosition(gl, centerUniform);
-    // updateSize(gl, sizeUniform);
-    gl.uniform2f(resolution, canvas.width, canvas.height);
-    gl.uniform1f(gl.getUniformLocation(program, 'u_time'), (Date.now() - startTime) / 1000);
-    gl.viewport(0, 0, canvas.width, canvas.height);
+    let canvasWidth = canvas.getBoundingClientRect().width;
+    let canvasHeight = canvas.getBoundingClientRect().height;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    const timeLoc   = gl.getUniformLocation(program, "u_time");
+    const resLoc    = gl.getUniformLocation(program, "u_resolution");
+    const speedLoc  = gl.getUniformLocation(program, "speed");
+    const dom1Loc   = gl.getUniformLocation(program, "dominantColor1");
+    const dom2Loc   = gl.getUniformLocation(program, "dominantColor2");
+    const turbLoc       = gl.getUniformLocation(program, "u_turbulence");
+
+    // In your render loop:
+    gl.uniform1f(timeLoc, performance.now() / 1000.0);
+    gl.uniform2f(resLoc, canvasWidth, canvasHeight);
+    gl.uniform1f(speedLoc, shaderSpeed);  // Adjust speed here.
+    gl.uniform3f(dom1Loc, 0.0, 0.2, 1.0);  // Base color.
+    gl.uniform3f(dom2Loc, 0.8, 0.3, 0.6);  // Modulation color.
+    gl.uniform1f(turbLoc, shaderTurbulence);
+
+
+    gl.viewport(0, 0, canvasWidth, canvasHeight);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
+    // updateTurbulence(0.01);
     initWebGL();
 }
 
@@ -91,27 +113,6 @@ function createProgram(gl, vertexShader, fragmentShader) {
     }
 
     return program;
-}
-
-function updateSize(gl, sizeUniform)
-{
-    const elapsedTime = (Date.now() - startTime) / 1000.0;
-    const size = (Math.pow(Math.sin(elapsedTime), 2) + 1) * 2;
-
-    gl.uniform1f(sizeUniform, size);
-}
-
-function updatePosition(gl, centerUniform)
-{
-    const elapsedTime = (Date.now() - startTime) / 1000.0;
-
-    const center = [
-        Math.sin(elapsedTime) * 0.5,
-        Math.cos(elapsedTime) * 0.5,
-        0.0
-    ];
-
-    gl.uniform3fv(centerUniform, center);
 }
 
 initWebGL();

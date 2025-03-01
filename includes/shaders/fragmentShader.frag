@@ -1,10 +1,142 @@
-precision mediump float;
+#ifdef GL_ES
+precision highp float;
+#endif
 
-varying vec3 v_position;
+// Uniforms (set from JS)
+uniform float u_time;
+uniform vec2  u_resolution;
+uniform float speed;
+uniform float u_turbulence;  // New uniform to control turbulence
+uniform vec3  dominantColor1;
+uniform vec3  dominantColor2;
 
-uniform float u_time;      // Time in seconds
-uniform vec2 u_resolution; // Viewport resolution
+// Internal constants
+const vec3 color3 = vec3(0.062745, 0.078431, 0.600000);
+const float innerRadius = 0.6;
+const float noiseScale  = 0.65;
 
-void main() {
-    gl_FragColor = vec4(1.0 * v_position.x, 0.0, 1.0 * v_position.y, 1.0);
+#define BG_COLOR vec3(0.0)
+
+//-------------------------------------------------------------------
+// Hash and noise functions
+//-------------------------------------------------------------------
+vec3 hash33(vec3 p3)
+{
+    p3 = fract(p3 * vec3(0.1031, 0.11369, 0.13787));
+    p3 += dot(p3, p3.yxz + 19.19);
+    return -1.0 + 2.0 * fract(vec3(p3.x+p3.y, p3.x+p3.z, p3.y+p3.z) * p3.zyx);
+}
+
+float snoise3(vec3 p)
+{
+    const float K1 = 0.333333333;
+    const float K2 = 0.166666667;
+
+    vec3 i = floor(p + dot(p, vec3(K1)));
+    vec3 d0 = p - (i - dot(i, vec3(K2)));
+
+    vec3 e = step(vec3(0.0), d0 - d0.yzx);
+    vec3 i1 = e * (1.0 - e.zxy);
+    vec3 i2 = 1.0 - e.zxy * (1.0 - e);
+
+    vec3 d1 = d0 - (i1 - vec3(K2));
+    vec3 d2 = d0 - (i2 - vec3(K1));
+    vec3 d3 = d0 - 0.5;
+
+    vec4 h = max(vec4(0.6) - vec4(dot(d0,d0), dot(d1,d1), dot(d2,d2), dot(d3,d3)), vec4(0.0));
+    vec4 n = h * h * h * h * vec4(
+    dot(d0, hash33(i)),
+    dot(d1, hash33(i + i1)),
+    dot(d2, hash33(i + i2)),
+    dot(d3, hash33(i + 1.0))
+    );
+    return dot(vec4(31.316), n);
+}
+
+//-------------------------------------------------------------------
+// Extract alpha from color based on brightest channel
+//-------------------------------------------------------------------
+vec4 extractAlpha(vec3 colorIn)
+{
+    vec4 colorOut;
+    float maxValue = min(max(max(colorIn.r, colorIn.g), colorIn.b), 1.0);
+    if(maxValue > 1e-5)
+    {
+        colorOut.rgb = colorIn.rgb / maxValue;
+        colorOut.a = maxValue;
+    }
+    else
+    {
+        colorOut = vec4(0.0);
+    }
+    return colorOut;
+}
+
+//-------------------------------------------------------------------
+// Light functions
+//-------------------------------------------------------------------
+float light1(float intensity, float attenuation, float dist)
+{
+    return intensity / (1.0 + dist * attenuation);
+}
+
+float light2(float intensity, float attenuation, float dist)
+{
+    return intensity / (1.0 + dist * dist * attenuation);
+}
+
+//-------------------------------------------------------------------
+// Core ring effect drawing function
+//-------------------------------------------------------------------
+void draw(out vec4 _FragColor, in vec2 uv)
+{
+    float timeScaled = u_time * speed;
+    float ang = atan(uv.y, uv.x);
+    float len = length(uv);
+
+    // Use the new u_turbulence to modify the noise frequency:
+    float n0 = snoise3(vec3(uv * noiseScale * u_turbulence, timeScaled * 0.5)) * 0.5 + 0.5;
+    float r0 = mix(mix(innerRadius, 1.0, 0.4), mix(innerRadius, 1.0, 0.6), n0);
+    float d0 = distance(uv, (r0 / len) * uv);
+
+    float v0 = light1(1.0, 10.0, d0);
+    v0 *= smoothstep(r0 * 1.05, r0, len);
+    float cl = cos(ang + timeScaled * 2.0) * 0.5 + 0.5;
+
+    float a = timeScaled * -1.0;
+    vec2 pos = vec2(cos(a), sin(a)) * r0;
+    float d = distance(uv, pos);
+    float v1 = light2(1.5, 5.0, d);
+    v1 *= light1(1.0, 50.0, d0);
+
+    float v2 = smoothstep(1.0, mix(innerRadius, 1.0, n0 * 0.5), len);
+    float v3 = smoothstep(innerRadius, mix(innerRadius, 1.0, 0.5), len);
+
+    vec3 col = mix(dominantColor1, dominantColor2, cl);
+    col = mix(color3, col, v0);
+    col = (col + v1) * v2 * v3;
+    col = clamp(col, 0.0, 1.0);
+
+    _FragColor = extractAlpha(col);
+}
+
+//-------------------------------------------------------------------
+// Main entry point
+//-------------------------------------------------------------------
+varying vec2 v_texCoord;
+void main()
+{
+    // Map gl_FragCoord to uv in [0,1]
+    vec2 uv = gl_FragCoord.xy / u_resolution;
+    // Map uv from [0,1] to [-1,1]
+    uv = uv * 2.0 - 1.0;
+    // Multiply x by the aspect ratio (u_resolution.x / u_resolution.y)
+    uv.x *= (u_resolution.x / u_resolution.y);
+
+    vec4 col;
+    draw(col, uv);
+
+    // gl_FragColor.rgb = vec3(uv.x, uv.y, 0.0);
+    gl_FragColor.rgb = mix(BG_COLOR, col.rgb, col.a);
+    gl_FragColor.a = 1.0;
 }
