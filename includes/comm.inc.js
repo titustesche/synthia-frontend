@@ -66,6 +66,8 @@ async function Request()
                             if (done) {
                                 controller.close();
                                 activeMessage.outline = false;
+                                shaderSpeed = 0.3;
+                                targetTurbulence = 0.0;
                                 return;
                             }
                             // Fetch the individual words
@@ -78,6 +80,9 @@ async function Request()
                                 let content = json.data;
 
                                 console.log(typeof content);
+
+                                targetTurbulence = 3.0;
+                                shaderSpeed = 1.5;
 
                                 switch (type) {
                                     case "think":
