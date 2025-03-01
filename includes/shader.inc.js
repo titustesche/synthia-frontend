@@ -1,11 +1,26 @@
-const startTime = Date.now();
-let targetTurbulence = 0.0;
+let shaderTime = 0.0;
+let timeCheck = 0.0;
 let shaderTurbulence = 0.0;
-let shaderSpeed = 1.0;
+let shaderSpeed = 1;
+let color1 = (0)
 
-async function updateTurbulence(factor) {
-    shaderTurbulence += (targetTurbulence - shaderTurbulence) * factor;
+async function updateTurbulence(target, factor) {
+    // Calculate the total change needed
+    let margin = target - shaderTurbulence;
+    let steps = Math.abs(margin) / factor;
+
+    // Increment or decrement shaderTurbulence by factor each step
+    for (let i = 0; i < steps; i++) {
+        // Adjust shaderTurbulence towards target
+        shaderTurbulence += (margin > 0 ? factor : -factor);
+        await new Promise(resolve => setTimeout(resolve, 20));
+    }
+
+    // Ensure shaderTurbulence lands exactly on target
+    shaderTurbulence = target;
 }
+
+
 
 async function initWebGL() {
     const canvas = document.getElementById('shader_canvas');
@@ -63,15 +78,18 @@ async function initWebGL() {
 
     const timeLoc   = gl.getUniformLocation(program, "u_time");
     const resLoc    = gl.getUniformLocation(program, "u_resolution");
-    const speedLoc  = gl.getUniformLocation(program, "speed");
     const dom1Loc   = gl.getUniformLocation(program, "dominantColor1");
     const dom2Loc   = gl.getUniformLocation(program, "dominantColor2");
     const turbLoc       = gl.getUniformLocation(program, "u_turbulence");
 
+    let now = performance.now() / 1000; // Current time in seconds
+    let deltaTime = now - timeCheck; // Time elapsed since last update
+    shaderTime += deltaTime * shaderSpeed; // Scale time advancement by shaderSpeed
+    timeCheck = now; // Store the current time for the next frame
+
     // In your render loop:
-    gl.uniform1f(timeLoc, performance.now() / 1000.0);
+    gl.uniform1f(timeLoc, shaderTime);
     gl.uniform2f(resLoc, canvasWidth, canvasHeight);
-    gl.uniform1f(speedLoc, shaderSpeed);  // Adjust speed here.
     gl.uniform3f(dom1Loc, 0.0, 0.2, 1.0);  // Base color.
     gl.uniform3f(dom2Loc, 0.8, 0.3, 0.6);  // Modulation color.
     gl.uniform1f(turbLoc, shaderTurbulence);
