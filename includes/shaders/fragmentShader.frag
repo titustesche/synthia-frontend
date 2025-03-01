@@ -5,14 +5,13 @@ precision highp float;
 // Uniforms (set from JS)
 uniform float u_time;
 uniform vec2  u_resolution;
-uniform float speed;
 uniform float u_turbulence;  // New uniform to control turbulence
 uniform vec3  dominantColor1;
 uniform vec3  dominantColor2;
 
 // Internal constants
 const vec3 color3 = vec3(0.062745, 0.078431, 0.600000);
-const float innerRadius = 0.6;
+const float innerRadius = 0.3;
 const float noiseScale  = 0.65;
 
 #define BG_COLOR vec3(0.0)
@@ -90,20 +89,19 @@ float light2(float intensity, float attenuation, float dist)
 //-------------------------------------------------------------------
 void draw(out vec4 _FragColor, in vec2 uv)
 {
-    float timeScaled = u_time * speed;
     float ang = atan(uv.y, uv.x);
     float len = length(uv);
 
     // Use the new u_turbulence to modify the noise frequency:
-    float n0 = snoise3(vec3(uv * noiseScale * u_turbulence, timeScaled * 0.5)) * 0.5 + 0.5;
+    float n0 = snoise3(vec3(uv * noiseScale * u_turbulence, u_time * 0.5)) * 0.5 + 0.5;
     float r0 = mix(mix(innerRadius, 1.0, 0.4), mix(innerRadius, 1.0, 0.6), n0);
     float d0 = distance(uv, (r0 / len) * uv);
 
     float v0 = light1(1.0, 10.0, d0);
     v0 *= smoothstep(r0 * 1.05, r0, len);
-    float cl = cos(ang + timeScaled * 2.0) * 0.5 + 0.5;
+    float cl = cos(ang + u_time * 2.0) * 0.5 + 0.5;
 
-    float a = timeScaled * -1.0;
+    float a = u_time * -1.0;
     vec2 pos = vec2(cos(a), sin(a)) * r0;
     float d = distance(uv, pos);
     float v1 = light2(1.5, 5.0, d);
