@@ -60,14 +60,15 @@ async function Request()
 
             return new ReadableStream({
                 start(controller) {
+                    updateTurbulence(3.0, 0.01);
                     function push() {
                         reader.read().then(async ({done, value}) => {
                             // Close connection if done is set to true
                             if (done) {
                                 controller.close();
                                 activeMessage.outline = false;
-                                shaderSpeed = 0.3;
-                                targetTurbulence = 0.0;
+                                shaderSpeed = 1;
+                                updateTurbulence(0.0, 0.01);
                                 return;
                             }
                             // Fetch the individual words
@@ -78,11 +79,7 @@ async function Request()
                                 let json = JSON.parse(chunk);
                                 let type = json.type;
                                 let content = json.data;
-
-                                console.log(typeof content);
-
-                                targetTurbulence = 3.0;
-                                shaderSpeed = 1.5;
+                                shaderSpeed = 2;
 
                                 switch (type) {
                                     case "think":
