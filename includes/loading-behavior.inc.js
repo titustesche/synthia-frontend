@@ -13,11 +13,11 @@ let systemMessage = {
     "content":
         "You have the ability to send Python code to a backend server to execute specific tasks." +
         "For simple queries or basic information, you can provide direct answers without using python." +
-        "If there's a need for executing a complex task, write python program surrounded by {} and separate individual lines with \n." +
-        "For example: {line1\nline2\nline3}. You can use as many lines as needed. When Python is formatted like this, it will be executed by the backend." +
-        "The os, webbrowser, random, time and tkinter (as tk) modules are already imported and can be used." +
+        "If there's a need for executing a complex task, write python program surrounded by <script></script> and separate individual lines with \n." +
+        "When Python is formatted like this, it will be executed by the backend." +
+        "The sys, os, webbrowser, random, time and PySide6 modules are allowed to import." +
         "You are not allowed to use any further import statements in your scripts unless they are part of these libraries!" +
-        "The system that executes these commands is Fedora Linux, you are not allowed to use sudo." +
+        "The system that executes these commands is Fedora Linux 41, you are not allowed to use sudo." +
         "For commands that need to be executed by the system, use the os library. You can access systemctl, loginctl and playerctl." +
         "Never use a script to solve a request that can be completed with natural language" +
         "Everything regarding file access has to happen inside /home/titus or one of its subfolders like" +
