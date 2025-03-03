@@ -6,15 +6,24 @@ precision highp float;
 uniform float u_time;
 uniform vec2  u_resolution;
 uniform float u_turbulence;  // New uniform to control turbulence
+uniform float u_corruption;    // New uniform to adjust UV distortion strength
 uniform vec3  dominantColor1;
 uniform vec3  dominantColor2;
 
 // Internal constants
-const vec3 color3 = vec3(0.062745, 0.078431, 0.600000);
+// Removed constant dark blue so that glow respects dominant colors.
+// const vec3 color3 = vec3(0.062745, 0.078431, 0.600000);
 const float innerRadius = 0.3;
 const float noiseScale  = 0.65;
 
 #define BG_COLOR vec3(0.0)
+
+//-------------------------------------------------------------------
+// Random function for glitch manipulation
+//-------------------------------------------------------------------
+float rand(vec2 co) {
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
 
 //-------------------------------------------------------------------
 // Hash and noise functions
@@ -110,8 +119,9 @@ void draw(out vec4 _FragColor, in vec2 uv)
     float v2 = smoothstep(1.0, mix(innerRadius, 1.0, n0 * 0.5), len);
     float v3 = smoothstep(innerRadius, mix(innerRadius, 1.0, 0.5), len);
 
+    // Compute base color from the chosen dominant colors.
     vec3 col = mix(dominantColor1, dominantColor2, cl);
-    col = mix(color3, col, v0);
+    // Removed mixing with a constant dark blue so the glow respects the chosen colors.
     col = (col + v1) * v2 * v3;
     col = clamp(col, 0.0, 1.0);
 
@@ -128,13 +138,34 @@ void main()
     vec2 uv = gl_FragCoord.xy / u_resolution;
     // Map uv from [0,1] to [-1,1]
     uv = uv * 2.0 - 1.0;
-    // Multiply x by the aspect ratio (u_resolution.x / u_resolution.y)
+    // Adjust x by the aspect ratio (u_resolution.x / u_resolution.y)
     uv.x *= (u_resolution.x / u_resolution.y);
+
+    // --- UV Manipulation for glitching bands ---
+    // Remap uv.y from [-1,1] to [0,1] and quantize into 50 bands:
+    float band = floor(((uv.y + 1.0) / 2.0) * 50.0);
+
+    // Base continuous horizontal offset for subtle motion.
+    float baseOffset = sin(u_time * 2.0 + band * 2.0) * 0.05;
+
+    // Compute a discrete glitch offset that updates at 5Hz:
+    float glitchDiscrete = floor(u_time * 5.0);
+    float glitchTarget = (rand(vec2(band, glitchDiscrete * 1.3)) - 0.5) * 0.3;
+
+    // Add a high-frequency jitter component (e.g. 50Hz) for extra jumpiness.
+    float jitter = (rand(vec2(band, u_time * 50.0)) - 0.5) * 0.05;
+
+    // Combine the discrete glitch with the jitter.
+    float glitchOffset = glitchTarget + jitter;
+
+    // Final x offset applied to the uv coordinate, scaled by the u_corruption uniform.
+    float xOffset = baseOffset + glitchOffset;
+    uv.x += u_corruption * xOffset;
+    // --- End UV Manipulation ---
 
     vec4 col;
     draw(col, uv);
 
-    // gl_FragColor.rgb = vec3(uv.x, uv.y, 0.0);
     gl_FragColor.rgb = mix(BG_COLOR, col.rgb, col.a);
     gl_FragColor.a = 1.0;
 }
