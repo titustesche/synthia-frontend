@@ -1,0 +1,40 @@
+{
+  "shader": {
+    "colors": {
+      "idle": {
+        "primary": {
+          "r": 0.0,
+          "g": 0.3,
+          "b": 1.0
+        },
+        "secondary": {
+          "r": 0.8,
+          "g": 0.3,
+          "b": 0.6
+        }
+      },
+      "thinking": {
+        "primary": {
+          "r": 0.0,
+          "g": 0.3,
+          "b": 1.0
+        },
+        "secondary": {
+          "r": 0.8,
+          "g": 0.3,
+          "b": 0.6
+        }
+      }
+    },
+    "idle-speed": 0.3,
+    "activity-speed": 1.0,
+    "idle-turbulence": 1.5,
+    "activity-turbulence": 3.5,
+    "idle-corruption": 0.0,
+    "activity-corruption": 0.0
+  },
+  "chat": {
+    "user-color": "#00ff00",
+    "assistant-color": "#0000ff"
+  }
+}

@@ -19,14 +19,15 @@ class Conversation {
     }
 }
 
-// Class to represent Messages - Todo: Add a way to interact with individual elements inside the message
+// Class to represent Messages
+// Todo: Add a way to interact with individual elements inside the message
 class Message {
     // Thinking portion of the message
     thoughtContainer;
-    thoughts;
+    thoughts = "";
     visibleThoughts = false;
     // Content of the message for in program usage
-    content;
+    content = "";
     // The role as a string
     role;
     // The message's HTML element
@@ -44,7 +45,7 @@ class Message {
     // The message outline's attributes
     // Todo: Implement these somehow?
     //  I don't really know why they are still around to be honest,
-    //  but i like this approach so i'm gonna implement it
+    //  but i like this approach so i'm gonna implement it anyway
     get outline() { return this._outline; }
     get outlineShape() { return this._outlineShape; }
     set outline(outline) { this._outline = outline;

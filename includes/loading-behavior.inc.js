@@ -57,7 +57,7 @@ window.onload = async function() {
 
     // Render the Conversations
     await conversations.forEach(conversation => {
-        conversation.render(document.getElementById("sidebar-wrapper"));
+        conversation.render(document.getElementById("conversion-wrapper"));
 
         // Make the conversations clickable
         conversation.object.addEventListener('click', async function() {

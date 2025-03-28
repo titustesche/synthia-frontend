@@ -3,6 +3,7 @@ let timeCheck = 0.0;
 let shaderTurbulence = 2.0;
 let shaderSpeed = 0.3;
 let shaderCorruption = 0.0;
+let shaderCorruptionSpeed = 1;
 let color1 = {
     r: 1.0,
     g: 0.0,
@@ -92,6 +93,7 @@ async function initWebGL() {
     const dom2Loc   = gl.getUniformLocation(program, "dominantColor2");
     const turbLoc       = gl.getUniformLocation(program, "u_turbulence");
     const corruptionLoc = gl.getUniformLocation(program, "u_corruption");
+    const corruptionSpeedLoc = gl.getUniformLocation(program, "u_corruptionSpeed");
 
     let now = performance.now() / 1000; // Current time in seconds
     let deltaTime = now - timeCheck; // Time elapsed since last update
@@ -105,6 +107,7 @@ async function initWebGL() {
     gl.uniform3f(dom2Loc, color2.r, color2.g, color2.b);  // Modulation color.
     gl.uniform1f(turbLoc, shaderTurbulence);
     gl.uniform1f(corruptionLoc, shaderCorruption);
+    gl.uniform1f(corruptionSpeedLoc, shaderCorruptionSpeed)
 
 
     gl.viewport(0, 0, canvasWidth, canvasHeight);

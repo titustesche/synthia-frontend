@@ -37,7 +37,7 @@ body {
 
 .header, .sidebar, .main {
     background-color: rgba(223, 223, 223, 0.02);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     color: var(--text-color);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.10);
@@ -52,7 +52,7 @@ body {
 }
 
 .header:hover, .sidebar:hover, .main:hover {
-    backdrop-filter: blur(7px);
+    backdrop-filter: blur(2px);
     transition: backdrop-filter .2s;
 }
 
@@ -103,10 +103,10 @@ body {
 #ui_wrapper {
     display: flex;
     justify-content: space-between;
-    background-color: #474747;
+    background-color: rgba(255, 255, 255, 0.15);
     color: white;
     border-radius: 15px;
-    border: 1px solid grey;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-right: none;
     position: relative;
     bottom: 0;
@@ -157,10 +157,6 @@ body {
     transition: .2s;
 }
 
-.conversation::before {
-
-}
-
 .conversation::after {
     background: rgba(83, 83, 83, 0.07);
     backdrop-filter: blur(10px);
@@ -207,7 +203,8 @@ body {
     border-radius: 10px;
     padding: 0 10px 10px 10px;
     white-space: pre-wrap;
-    border: 1px solid grey;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
     margin: 0.5rem;
     line-height: 110%;
 }
@@ -220,7 +217,8 @@ body {
 
 .msg_assistant::before, .msg_user::before {
     z-index: -1;
-    background: linear-gradient(-45deg, #272727, #474747);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
     content: "";
     position: absolute;
     height: 100%;
@@ -321,7 +319,7 @@ body {
     background-clip: text;
     color: transparent;
     line-height: 1em;
-    animation: Animation 3s linear infinite;
+    animation: thoughTextAnimation 3s linear infinite;
 }
 
 .thought_container:hover {
@@ -330,7 +328,33 @@ body {
     cursor: pointer;
 }
 
-@keyframes Animation {
-    0%{background-position:200% 0%}
-    100%{background-position:0% 0%}
+@keyframes thoughTextAnimation {
+    0%{background-position:200% 0}
+    100%{background-position:0 0}
+}
+
+#settings-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    bottom: 0;
+}
+
+#conversion-wrapper {
+    height: 100%;
+}
+
+#user-page-button, #settings-page-button {
+    height: fit-content;
+    padding: 0.5rem;
+    margin: 0.2rem;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+}
+
+#user-page-button {
+    width: 100%;
 }

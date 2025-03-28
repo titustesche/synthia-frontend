@@ -60,15 +60,15 @@ async function Request()
 
             return new ReadableStream({
                 start(controller) {
-                    updateTurbulence(3.0, 0.01);
+                    updateTurbulence(3.5, 0.01);
                     function push() {
                         reader.read().then(async ({done, value}) => {
                             // Close connection if done is set to true
                             if (done) {
                                 controller.close();
                                 activeMessage.outline = false;
-                                shaderSpeed = 1;
-                                updateTurbulence(0.0, 0.01);
+                                shaderSpeed = 0.3;
+                                updateTurbulence(1.5, 0.01);
                                 return;
                             }
                             // Fetch the individual words

@@ -6,7 +6,8 @@ precision highp float;
 uniform float u_time;
 uniform vec2  u_resolution;
 uniform float u_turbulence;  // New uniform to control turbulence
-uniform float u_corruption;    // New uniform to adjust UV distortion strength
+uniform float u_corruption;    // Uniform to adjust UV distortion strength
+uniform float u_corruptionSpeed;  // New uniform to control corruption speed
 uniform vec3  dominantColor1;
 uniform vec3  dominantColor2;
 
@@ -148,12 +149,12 @@ void main()
     // Base continuous horizontal offset for subtle motion.
     float baseOffset = sin(u_time * 2.0 + band * 2.0) * 0.05;
 
-    // Compute a discrete glitch offset that updates at 5Hz:
-    float glitchDiscrete = floor(u_time * 5.0);
+    // Compute a discrete glitch offset using u_corruptionSpeed to control its speed.
+    float glitchDiscrete = floor(u_time * u_corruptionSpeed * 5.0);
     float glitchTarget = (rand(vec2(band, glitchDiscrete * 1.3)) - 0.5) * 0.3;
 
-    // Add a high-frequency jitter component (e.g. 50Hz) for extra jumpiness.
-    float jitter = (rand(vec2(band, u_time * 50.0)) - 0.5) * 0.05;
+    // Add a jitter component using u_corruptionSpeed.
+    float jitter = (rand(vec2(band, u_time * u_corruptionSpeed * 50.0)) - 0.5) * 0.05;
 
     // Combine the discrete glitch with the jitter.
     float glitchOffset = glitchTarget + jitter;
