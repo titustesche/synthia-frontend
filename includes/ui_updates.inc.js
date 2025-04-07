@@ -82,20 +82,7 @@ class Message {
         else { updateScroll(); }
     }
     
-    // Does what it says - deprecated
-    /*
-    toggleOutline() {
-        switch (this._outline) {
-            case true:
-                this.object.setAttribute("outline", "true");
-                break;
-                
-            case false:
-                this.object.setAttribute("outline", "false");
-                break;
-        }
-    }
-     */
+    
     
     // Also does what it says
     createHeader() {
