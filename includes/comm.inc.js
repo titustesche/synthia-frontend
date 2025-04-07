@@ -37,7 +37,7 @@ async function Request()
 
     let body = {
         url: "http://localhost:11434/api/chat",
-        model: "deepseek-r1:14b",
+        model: "deepseek-r1:32b",
         role: "user",
         query: textarea.value,
         images: []
