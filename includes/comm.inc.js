@@ -32,12 +32,12 @@ async function Request()
     messageElements[messageElements.length - 1].pushText(textarea.value);
     activeMessage = new Message("assistant");
     messageElements.push(activeMessage);
-    activeMessage.outline = true;
+    // activeMessage.outline = true;
     activeMessage.outlineShape = 'transparent, #00d0ff';
 
     let body = {
         url: "http://localhost:11434/api/chat",
-        model: "deepseek-r1:32b",
+        model: "deepseek-r1:14b",
         role: "user",
         query: textarea.value,
         images: []
