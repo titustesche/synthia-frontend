@@ -82,7 +82,12 @@ class Message {
         else { updateScroll(); }
     }
     
-    
+    // Todo:
+    //  Rework to match the following requirements:
+    //  - Initialize() creates the header and renders the message on screen
+    //  - Pack all the pushWhatever methods into one queueContent(type, content)
+    //      - This would then manage displaying all the messages contents, also prevents word skipping
+    //      - This can then look at a json file or whatever to easily make use of custom message elements
     
     // Also does what it says
     createHeader() {
@@ -214,13 +219,11 @@ class Message {
 // Updates all the messages of a given conversation
 async function updateMessages(conversation) {
     // Get all the messages
-    messageObjects = await getMessages(conversation.id);
-    console.log(messageObjects);
     // Clear Elements and current Chatbox
     messageElements = [];
     chatbox.innerHTML = "";
     // Wait for messages to render
-    await renderMessages(messageObjects)
+    await renderMessages(await getMessages(conversation.id))
         .then(() => {
             return true;
         });
@@ -230,8 +233,8 @@ async function updateMessages(conversation) {
 async function renderMessages(messages) {
     for(let i = 0; i < messages.length; i++) {
         if (i !== 0) {
+            activeMessage = new Message(messages[i].role);
             if (messages[i].role !== "system") {
-                activeMessage = new Message(messages[i].role);
                 if (messages[i].role !== "user")
                 {
                     let cleanMessage = JSON.parse(`{"blocks":${messages[i].content}}`);
@@ -271,7 +274,7 @@ async function renderMessages(messages) {
                 }
             }
             updateScroll();
-            
+
             // Push to global message Elements
             activeMessage.outlineShape = '#ffffff00';
             messageElements.push(activeMessage);
@@ -348,3 +351,32 @@ function drawMouseHighlight(element, x, y, color, backgroundColor, size) {
         element.style.backgroundImage = `radial-gradient(circle farthest-corner at ${highlightX}% ${highlightY}%, ${color} 5px, ${backgroundColor} ${size}px`;
     }
 }
+
+function newConversation() {
+    let conversation = new Conversation();
+    conversation.name = "Test";
+    conversation.render(conversationContainer);
+}
+
+async function updateOpacity() {
+    let container = document.getElementById("conversation-wrapper");
+    let containerTransform = container.getBoundingClientRect();
+    let conversations = container.children;
+    let scaleFactor = 5.5;
+
+    for (let i = 0; i < conversations.length; i++) {
+        let conversationTransform = conversations[i].getBoundingClientRect();
+        // Get the y position of the bottom of the container
+        let containerBottom = (containerTransform.height + containerTransform.y - conversationTransform.height).toFixed(0);
+        // Get the distance between the y coordinate of the conversation and the bottom of the container
+        let distance = -(containerBottom - conversationTransform.y.toFixed(0));
+        // Calculate influence from that
+        let influence = 100 - ((distance / conversationTransform.height).toFixed(2) * 100);
+        influence = influence > 100 ? 100 : influence;
+        // Apply that opacity to the object
+        conversations[i].style.opacity = influence + '%';
+        // Geez, it's not even noticeable :(
+    }
+}
+
+// Make Elements in the conversation view fade when they reach the bottom of their parent
