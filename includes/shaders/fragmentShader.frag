@@ -17,7 +17,7 @@ uniform vec3  dominantColor2;
 const float innerRadius = 0.3;
 const float noiseScale  = 0.65;
 
-#define BG_COLOR vec3(0.0)
+#define BG_COLOR vec3(0.0, 0.0, 0.0)
 
 //-------------------------------------------------------------------
 // Random function for glitch manipulation
