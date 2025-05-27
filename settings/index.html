@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <link href="/includes/style.inc.css" rel="stylesheet">
         <title>Settings</title>
     </head>
     <body>
@@ -11,5 +12,28 @@
                     - Change Model
                     - Change Visual style
                     -->
+        <div class="container">
+            <div class="header">
+                <p>Settings</p>
+            </div>
+            <div class="sidebar">
+                <div class="ux-button">Account Settings</div>
+                <div class="ux-button">Model Configurations</div>
+                <div class="ux-button">Visual Style</div>
+            </div>
+            <div class="main">
+                <h2>Test settings page</h2>
+                <div class="wrapper">
+                    <p>Add custom Tags</p>
+                    <input type="text" placeholder="<tag>">
+                    <select id="tag-select">
+                        <option>Default Text</option>
+                        <option>Console Output</option>
+                        <option>Thinking Container</option>
+                    </select>
+                    <button>Add Tag</button>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
