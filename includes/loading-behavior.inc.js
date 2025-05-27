@@ -1,13 +1,11 @@
 // Global Variables
 let reader = new FileReader();
 // HTML Elements that need to be global
-let chatbox;
-let query;
-let messageObjects; // Todo: This does not need to be global -_-
+let chatbox, query, conversationContainer, cssRoot, activeMessage, activeConversation;
 
 // Conversation configuration -> Todo: Let Users edit this
 let assistantName = "Synthia";
-let userName = "Titus";
+let userName = "User";
 let systemMessage = {
     "role": "system",
     "content":
@@ -33,9 +31,6 @@ let systemMessage = {
 
 // Important global variables for Runtime - Representations, not real HTML Elements
 let messageElements = [];
-let cssRoot;
-let activeMessage;
-let activeConversation;
 
 // Todo: wieder implementieren
 const codes = Object.freeze({
@@ -50,14 +45,19 @@ const codes = Object.freeze({
 window.onload = async function() {
     // Assign important Elements
     chatbox = document.getElementById('chatbox');
+    conversationContainer = document.getElementsByClassName('sidebar-container')[0];
     cssRoot = document.documentElement;
+
+    document.getElementById("conversation-wrapper").addEventListener("scroll", () => {
+        updateOpacity();
+    });
 
     // Custom Method, returns all conversations as an array
     let conversations = await generateConversations();
 
     // Render the Conversations
     await conversations.forEach(conversation => {
-        conversation.render(document.getElementById("conversion-wrapper"));
+        conversation.render(conversationContainer);
 
         // Make the conversations clickable
         conversation.object.addEventListener('click', async function() {
@@ -121,11 +121,13 @@ window.onload = async function() {
     // Also it's fully customizable for every text Element
     document.getElementsByTagName('body')[0].addEventListener('mousemove', function (e) {
         // Read the default text color to use it as "Background"
-        let textColor = getComputedStyle(cssRoot).getPropertyValue('--text-color');
+        let textColor = getComputedStyle(cssRoot).getPropertyValue('--primary-text-color');
         
         // Apply Effect to messages and Conversations
         messageElements.forEach(messageElement => {
+            console.log(messageElement);
             if (messageElement.role === "assistant") {
+                console.log("Drawing highlight on assistant message");
                 drawMouseHighlight(messageElement.body, e.pageX, e.pageY, "rgb(136,255,255)", "white", 150);
                 // Optional Mouse highlight for Assistant header, looks better without it
                 // drawMouseHighlight(messageElement.header, e.pageX, e.pageY, '#25d80a', "#0a5fd8", 150);
