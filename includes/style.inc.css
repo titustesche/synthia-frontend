@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Moderustic:wght@300..800&display=swap');
-
 :root {
     --outline-shape: #0EE1DAFF;
     --font: "Moderustic", sans-serif;
@@ -14,23 +12,20 @@ html {
 
 .ux-button:hover svg {
     transform: scale(120%);
-    transition: transform .1s ease-in;
+    transition: transform .3s ease-in;
 }
 
 .ux-button {
-    background-image: linear-gradient(45deg, rgba(14, 225, 218, 0.5), transparent 90%);
-    background-repeat: no-repeat;
     color: white;
     font-size: 100%;
     width: fit-content;
     cursor: pointer;
     height: fit-content;
     padding: 0.5rem;
-    border-radius: 15px;
+    border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: inset 0 0 20px rgba(14, 225, 218, 0.2);
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(20px);
-
     margin: 0.7rem;
     position: relative;
 }
@@ -39,10 +34,16 @@ html {
     margin: 0 0 0 0.5rem;
 }
 
-.ux-button[fullsize=true] {
+.ux-button[fullsize] {
     margin: 0;
     border-radius: 0;
     width: auto;
+}
+
+.ux-button[highlighted] {
+    background-image: linear-gradient(45deg, rgba(14, 225, 218, 0.5), transparent 90%);
+    box-shadow: inset 0 0 20px rgba(14, 225, 218, 0.2);
+    background-repeat: no-repeat;
 }
 
 .ux-button:hover::after {
@@ -81,13 +82,11 @@ body {
     gap: 0;
 }
 
-.sidebar {
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-}
-
+/* Noise Texture no workee, fuck */
 .header, .sidebar, .main {
     background-image: url('img/noise.webp');
-    background-size: 50vw;
+    background-size: 10vh;
+    background-repeat: repeat;
     backdrop-filter: blur(15px);
     color: var(--primary-text-color);
     text-align: justify;
@@ -135,6 +134,11 @@ body {
     grid-area: sidebar;
     width: 15vw;
     height: 100%;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar[centerItems] {
+    justify-content: center;
 }
 
 .main {
@@ -402,4 +406,22 @@ body {
 #conversation-wrapper {
     height: 100%;
     overflow: scroll;
+}
+
+.spacer {
+    font-size: 1.5em;
+    padding: 0 1rem 0 1rem;
+}
+
+.spacer[centerItems] {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+}
+
+.spacer[fancytext] {
+    color: transparent;
+    background: linear-gradient(to right, #a149ff, #46ffe3 80%);
+    background-clip: text;
 }
