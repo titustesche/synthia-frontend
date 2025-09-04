@@ -1,3 +1,6 @@
+// This is very poorly hacked together with AI
+// But as it currently works, rewriting has low priority
+
 let shaderTime = 0.0;
 let timeCheck = 0.0;
 let shaderTurbulence = 2.0;
@@ -7,12 +10,12 @@ let shaderCorruptionSpeed = 1;
 let color1 = {
     r: 1.0,
     g: 0.0,
-    b: 0.0
+    b: 1.0
 };
 let color2 = {
-    r: 0.9,
-    g: 0.1,
-    b: 0.1
+    r: 0.0,
+    g: 1.0,
+    b: 1.0
 };
 
 async function updateTurbulence(target, factor) {
@@ -87,11 +90,11 @@ async function initWebGL() {
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    const timeLoc   = gl.getUniformLocation(program, "u_time");
-    const resLoc    = gl.getUniformLocation(program, "u_resolution");
-    const dom1Loc   = gl.getUniformLocation(program, "dominantColor1");
-    const dom2Loc   = gl.getUniformLocation(program, "dominantColor2");
-    const turbLoc       = gl.getUniformLocation(program, "u_turbulence");
+    const timeLoc = gl.getUniformLocation(program, "u_time");
+    const resLoc = gl.getUniformLocation(program, "u_resolution");
+    const dom1Loc = gl.getUniformLocation(program, "dominantColor1");
+    const dom2Loc = gl.getUniformLocation(program, "dominantColor2");
+    const turbLoc = gl.getUniformLocation(program, "u_turbulence");
     const corruptionLoc = gl.getUniformLocation(program, "u_corruption");
     const corruptionSpeedLoc = gl.getUniformLocation(program, "u_corruptionSpeed");
 
