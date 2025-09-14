@@ -2,6 +2,7 @@
 let actionBuffer = "";
 let activityRead = 0;
 let aiMessage;
+let messageObjects = []; // Todo: This does not need to be global -_-
 
 // Encode an image that would be provided by an HTML element, not implemented yet
 function encodeImageFile(element) {
@@ -13,33 +14,40 @@ function encodeImageFile(element) {
     reader.readAsDataURL(file);
 }
 
-async function Request()
+
+// Todo: Sometimes objects cant be parsed because they are two objects as one (e.g. {name: "one"}{name: "two"})
+async function Request(prompt)
 {
-    const textarea = document.getElementById("query");
+    // Fallback for when the prompt can't be directly delivered like when pressing the "send" button manually
+    if (!prompt) {
+        let textarea = document.getElementById("query");
+        prompt = textarea.value;
+        textarea.value = null;
+    }
 
     // Add the message to the "messageObjects" object
     try
     {
-        messageObjects.push({"role": "user", "content": query, "images": [reader.result.split(',')[1]]});
+        messageObjects.push({"role": "user", "content": prompt, "images": [reader.result.split(',')[1]]});
     }
     catch
     {
-        messageObjects.push({"role": "user", "content": query});
+        messageObjects.push({"role": "user", "content": prompt});
     }
 
     // Retrieve that messageObjects container element
     messageElements.push(new Message("user"));
-    messageElements[messageElements.length - 1].pushText(textarea.value);
+    messageElements[messageElements.length - 1].pushText(prompt);
     activeMessage = new Message("assistant");
     messageElements.push(activeMessage);
-    activeMessage.outline = true;
+    // activeMessage.outline = true;
     activeMessage.outlineShape = 'transparent, #00d0ff';
 
     let body = {
         url: "http://localhost:11434/api/chat",
-        model: "deepseek-r1:14b",
+        model: "gpt-oss",
         role: "user",
-        query: textarea.value,
+        query: prompt,
         images: []
     }
     let options = {
@@ -49,9 +57,8 @@ async function Request()
                 "Content-Type": "application/json"
             },
         body: JSON.stringify(body),
+        credentials: "include"
     }
-
-    textarea.value = "";
 
     fetch(`http://localhost:3000/chat/${activeConversation.id}`, options)
         .then(response => response.body)
@@ -60,79 +67,42 @@ async function Request()
 
             return new ReadableStream({
                 start(controller) {
-                    updateTurbulence(3.0, 0.01);
+                    // Make shader turbulent when text is being generated
+                    updateTurbulence(3.5, 0.01);
                     function push() {
                         reader.read().then(async ({done, value}) => {
                             // Close connection if done is set to true
                             if (done) {
                                 controller.close();
                                 activeMessage.outline = false;
-                                shaderSpeed = 1;
-                                updateTurbulence(0.0, 0.01);
+                                shaderSpeed = 0.3;
+                                updateTurbulence(1.5, 0.01);
                                 return;
                             }
+
                             // Fetch the individual words
                             await controller.enqueue(value);
                             let chunk = new TextDecoder().decode(value);
 
+                            // Yes, error handling
                             try {
                                 let json = JSON.parse(chunk);
                                 let type = json.type;
                                 let content = json.data;
+                                if (type === "script") {
+                                    let lang = json.lang;
+                                }
                                 shaderSpeed = 2;
 
-                                switch (type) {
-                                    case "think":
-                                        if (content.length <= 0) {
-                                            console.log("Undefined content received");
-                                            break;
-                                        }
+                                // Todo: Rework this into a single function and let message class worry about that
+                                //      oh, also tell message class how to worry about it
 
-                                        await (async () => {
-                                            for (let char of content) {
-                                                activeMessage.pushThought(char);
-                                                await new Promise(function (resolve) {
-                                                    setTimeout(resolve, 20);
-                                                });
-                                            }
-                                        })();
-                                        break;
-
-                                    case "text":
-                                        if (!content) {
-                                            console.log("Undefined content received");
-                                            break;
-                                        }
-
-                                        await (async () => {
-                                            for (let char of content) {
-                                                activeMessage.pushText(char);
-                                                await new Promise(function (resolve) {
-                                                    setTimeout(resolve, 20);
-                                                });
-                                            }
-                                        })();
-                                        break;
-
-                                    case "script":
-                                        if (!content) {
-                                            console.log("Undefined content received");
-                                            break;
-                                        }
-
-                                        await (async () => {
-                                            for (let char of content) {
-                                                activeMessage.pushText(char);
-                                                await new Promise(function (resolve) {
-                                                    setTimeout(resolve, 20);
-                                                });
-                                            }
-                                        })();
-                                        break;
-                                }
+                                activeMessage.queueContent(type, content);
                             }
 
+                            // kinda...
                             catch (e) {
+
                                 console.log(`An error occurred: ${e}, Chunk: ${chunk}`);
                             }
 
@@ -151,290 +121,6 @@ async function Request()
         });
 }
 
-// Triggers when the user sends their message
-// Also warning, this is one monster of a function and changing it could even affect the backend
-// Change with care and consult the Documentary that does not exist yet
-/* Deprecated
-async function sendRequest(role, query) {
-    query = role === "system" ? query : textarea.value;
-    // For debugging purposes
-    console.log(role);
-    console.log(query);
-    aiMessage = "";
-    
-    // Add the message to the "messageObjects" object
-    try
-    {
-        messageObjects.push({"role": "user", "content": query, "images": [reader.result.split(',')[1]]});
-    }
-    catch
-    {
-        messageObjects.push({"role": "user", "content": query});
-    }
-    
-    // Retrieve that messageObjects container element
-    if (role !== "system")
-    {
-        console.log("User requested message");
-        messageElements.push(new Message("user"));
-        messageElements[messageElements.length - 1].pushText(textarea.value);
-        await saveMessage("user", textarea.value, activeConversation.id);
-        activeMessage = new Message("assistant");
-        messageElements.push(activeMessage);
-        activeMessage.outline = true;
-        activeMessage.outlineShape = 'transparent, #00d0ff';
-    }
-    
-    // Construct request
-    let url = "http://localhost:11434/api/chat";
-    const data = {
-        "model": "qwen2.5:14b",
-        "messages": messageObjects,
-    };
-
-    // Clear the user's input field
-    textarea.value = "";
-
-    // Specify request options
-    const requestOptions = {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    };
-
-    // Request with the provided data
-    fetch(url, requestOptions)
-        .then(res => res.body)
-        .then(rb => {
-            const reader = rb.getReader();
-
-            return new ReadableStream({
-                start(controller) {
-                    function push() {
-                        reader.read().then(async ({done, value}) => {
-                            // Close connection if done is set to true
-                            if (done) {
-                                controller.close();
-                                return;
-                            }
-                            // Fetch the individual words
-                            await controller.enqueue(value);
-                            let json = JSON.parse(new TextDecoder().decode(value));
-                            
-                            let word = json.message.content;
-                            // Todo: Rework this to support more complex syntax
-                            //      also implementing an ongoing stream across many messageObjects to expand upon scripts -- oh boi, i don't think this will happen anytime soon
-                            //      Maybe another format?
-                            //      Also maybe feed python errors back into the AI for automatic correction -- works, but the AI rather just hallucinates outcomes than actually just reading the new message... bummers
-
-                            // activity read is > 0 when a python script is being sent
-                            // actionBuffer stores the current script
-                            switch (activityRead > 0)
-                            {
-                                // If a script is being sent
-                                case true:
-                                    // Update activity read to account for newly found brackets
-                                    activityRead += (word.match(/{/g) || []).length;
-                                    activityRead -= (word.match(/}/g) || []).length;
-
-                                    // If it's still above 0
-                                    if (activityRead > 0) {
-                                        // add the current word to the action buffer
-                                        actionBuffer += word;
-                                    }
-
-                                    // If that ended the script:
-                                    else {
-                                        // add the last word
-                                        actionBuffer += word;
-                                        // Notify the user and send the script to the backend server
-                                        await sendAction(actionBuffer);
-                                        // clear the action buffer
-                                        actionBuffer = "";
-                                    }
-                                    break;
-                                
-                                // If no script is being sent
-                                case false:
-                                    // Update activity read to account for newly found brackets
-                                    activityRead += (word.match(/{/g) || []).length;
-                                    activityRead -= (word.match(/}/g) || []).length;
-
-                                    // If there is still no script being sent
-                                    if (!activityRead > 0) {
-                                        // Update the active message with the new response and scroll down (scrolling needs fix, don't know why)
-                                        activeMessage.pushText(word);
-                                        // Add the current word to the AI's response
-                                        aiMessage += word;
-                                        updateScroll();
-                                    }
-
-                                    // If there is now a script being sent
-                                    else {
-                                        // Update the action buffer
-                                        actionBuffer += word;
-                                        // Notify the user
-                                        activeMessage.createPyout()
-                                        activeMessage.setCode(codes.WRITING);
-                                    }
-                                    break;
-                            }
-                            push();
-                        });
-                    }
-                    push();
-                }
-            });
-        })
-        .then(stream =>
-            new Response(stream, { headers: { "Content-Type": "text/html" } }).text()
-        )
-        .then(async (result) => {
-            // Update the messageObjects
-            activeMessage.outline = false;
-            messageObjects.push({"role": "assistant", "content": aiMessage});
-            await saveMessage("assistant", aiMessage, activeConversation.id);
-            
-            // if the action buffer still contains a script (should never happen)
-            if (actionBuffer.length > 0) {
-                // send that script and clear the action buffer
-                await sendAction(actionBuffer);
-                actionBuffer = "";
-            }
-        });
-}
- */
-
-// This function handles communication with the backend
-async function sendAction(code) {
-    activeMessage.setCode(codes.RUNNING);
-    // Clear up the requested code if it contains unwanted letters
-    while (code.charAt(code.length -1 ) === "}" || code.charAt(code.length -1 ) === "\n" || code.charAt(code.length -1 ) === " ") {
-        code = code.substring(0, code.length - 1);
-    }
-
-    while (code.charAt(0) === "{" || code.charAt(0) === "\n" || code.charAt(0) === " ") {
-        code = code.substring(1);
-    }
-    
-    console.log(code)
-    
-    // Send a request to the backend server 
-    fetch("http://127.0.0.1:3000/action", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({"query": code}),
-    })
-        .then(res => res.body)
-        .then(rb => {
-            const reader = rb.getReader();
-            
-            return new ReadableStream({
-                start(controller) {
-                    function push() {
-                        reader.read().then(async ({done, value}) => {
-                            // End the communication if done is set to true
-                            if (done) {
-                                controller.close();
-                                return;
-                            }
-                            await controller.enqueue(value);
-                            try {
-                                // Decode the response stream
-                                let json = JSON.parse(new TextDecoder().decode(value));
-                                
-                                // If the response contains data
-                                if (json.data !== undefined) {
-                                    // Update the active message and scroll down
-                                    activeMessage.pushResult(json.data);
-                                    updateScroll();
-                                }
-                            }
-                            catch (err) {
-                                console.error(err);
-                            }
-                            push();
-                        });
-                    }
-                    push();
-                }
-            });
-        })
-        .then(stream =>
-            new Response(stream, { headers: { "Content-Type": "text/html" } }).text()
-        )
-        .then((answer) => {
-            // Reformat the answer string to convert it to an array of JSON objects
-            let answerStringArray = answer.replaceAll(/}{/g, "}|{").split("|");
-            let answerArray = [];
-
-            // Convert the answer string
-            answerStringArray.forEach((item) => {
-                try {
-                    answerArray.push(JSON.parse(item.replace("\\n", "")));
-                }
-                catch (e) {
-                    console.error(e);
-                }
-            });
-
-            // Used to store the result as a JSON object
-            let result = { data: [] };
-
-            // Loop through the entire answer object and look for data, errors and exit codes
-            answerArray.forEach(obj => {
-                // Push the corresponding one if found
-                if ('data' in obj) {
-                    result.data.push(obj.data);
-                }
-                
-                if ('error' in obj)
-                {
-                    result.error = obj.error;
-                }
-                
-                if ('code' in obj) {
-                    result.code = obj.code;
-                    updateScroll();
-                    activeMessage.setCode(result.code);
-                }
-            });
-
-            // If it had no data, delete the data field
-            if (result.data.length === 0) {
-                delete result.data;
-            }
-            
-            // If it had, assign it
-            else {
-                result.data = result.data.join('\\n');
-            }
-            
-            // If it had an error, create error field
-            if (result.error)
-            {
-                activeMessage.pushError(result.error);
-            }
-            
-            // Create new message objects and push them to the message Array
-            let textResult = JSON.stringify(result);
-            messageObjects.push({"role": "assistant", "content": aiMessage});
-            messageObjects.push({"role": "system", "content": textResult});
-            
-            // Feed the output of that request back to the AI for validation (can lead to never ending loops)
-            sendRequest("system", textResult);
-        })
-        // Abusing the pyout error handling to display my shitty programming mistakes
-        .catch((err) => {
-            activeMessage.pushError(err);
-            activeMessage.setCode(codes.ERROR);
-        });
-}
-
 // Get all the conversations from the database and return them as and array
 async function generateConversations() {
     let res = [];
@@ -444,34 +130,30 @@ async function generateConversations() {
         headers: {
             "Content-Type": "application/json",
         },
+        credentials: "include",
     }
-    
-    await fetch(url, requestOptions)
-        .then(res => res.json())
-        .then(result => {
-            result.conversations.forEach(conversation => {
-                res.push(new Conversation(conversation.id, conversation.name));
-            });
-        });
-    return res;
-}
 
-// Save a message to the database
-/* Deprecated
-async function saveMessage(role, message, conversationId) {
-    let url = `http://localhost:3000/message/${conversationId}`;
-    let requestOptions = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({"role": role, "content": message}),
+    try {
+        let response = await fetch(url, requestOptions);
+        if (response.status === 401) {
+            throw new Error("Unauthorized");
+        }
+
+        if (!response.ok) {
+            throw new Error("HTTP Error. Status: " + response.status);
+        }
+
+        const result = await response.json();
+        result.conversations.forEach(conversation => {
+            res.push(new Conversation(conversation.id, conversation.name));
+        });
+        return res;
     }
-    
-    await fetch(url, requestOptions)
-        .then(res => res.json());
+
+    catch (e) {
+        throw e;
+    }
 }
- */
 
 // Requests all messages of a conversation from the backend
 async function getMessages(id) {
@@ -482,8 +164,9 @@ async function getMessages(id) {
         headers: {
             "Content-Type": "application/json",
         },
+        credentials: "include",
     }
-    
+
     await fetch(url, requestOptions)
         .then(res => res.json())
         .then(result => {
@@ -492,5 +175,7 @@ async function getMessages(id) {
                 res.push(message);
             });
         });
+
+    // Res is an array of messages and is
     return res;
 }
