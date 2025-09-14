@@ -446,14 +446,15 @@ async function newConversation() {
     console.log(name);
 
     let conversation = new Conversation();
-    await fetch ("http://127.0.0.1:3000/conversation", {
+    await fetch ("http://localhost:3000/conversation", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
             name: name
-        })
+        }),
+        credentials: "include",
     })
         .then(response => response.json())
         .then(data => {

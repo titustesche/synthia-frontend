@@ -57,6 +57,7 @@ async function Request(prompt)
                 "Content-Type": "application/json"
             },
         body: JSON.stringify(body),
+        credentials: "include"
     }
 
     fetch(`http://localhost:3000/chat/${activeConversation.id}`, options)
@@ -88,7 +89,9 @@ async function Request(prompt)
                                 let json = JSON.parse(chunk);
                                 let type = json.type;
                                 let content = json.data;
-                                if (type === "script") let lang = json.lang;
+                                if (type === "script") {
+                                    let lang = json.lang;
+                                }
                                 shaderSpeed = 2;
 
                                 // Todo: Rework this into a single function and let message class worry about that
@@ -127,16 +130,29 @@ async function generateConversations() {
         headers: {
             "Content-Type": "application/json",
         },
+        credentials: "include",
     }
-    
-    await fetch(url, requestOptions)
-        .then(res => res.json())
-        .then(result => {
-            result.conversations.forEach(conversation => {
-                res.push(new Conversation(conversation.id, conversation.name));
-            });
+
+    try {
+        let response = await fetch(url, requestOptions);
+        if (response.status === 401) {
+            throw new Error("Unauthorized");
+        }
+
+        if (!response.ok) {
+            throw new Error("HTTP Error. Status: " + response.status);
+        }
+
+        const result = await response.json();
+        result.conversations.forEach(conversation => {
+            res.push(new Conversation(conversation.id, conversation.name));
         });
-    return res;
+        return res;
+    }
+
+    catch (e) {
+        throw e;
+    }
 }
 
 // Requests all messages of a conversation from the backend
@@ -148,6 +164,7 @@ async function getMessages(id) {
         headers: {
             "Content-Type": "application/json",
         },
+        credentials: "include",
     }
 
     await fetch(url, requestOptions)

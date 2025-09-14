@@ -1,7 +1,7 @@
 // Global Variables
 let reader = new FileReader();
 // HTML Elements that need to be global
-let chatbox, query, conversationContainer, cssRoot, activeMessage, activeConversation;
+let chatbox, conversationContainer, cssRoot, activeMessage, activeConversation, conversations;
 
 // Conversation configuration -> Todo: Let Users edit this
 let assistantName = "Synthia";
@@ -34,11 +34,11 @@ let messageElements = [];
 
 // Todo: wieder implementieren
 const codes = Object.freeze({
-    SUCCESS: 0,
-    ERROR: 1,
-    WRITING: "Writing",
-    RUNNING: "Running",
-    INPUT_REQUIRED: "Waiting for Input", //Not in use
+    SUCCESS: 0, // Program exit code
+    ERROR: 1, // Program exit code
+    WRITING: "Writing", // Instructions for displaying
+    RUNNING: "Running", // Instructions for displaying
+    INPUT_REQUIRED: "Waiting for Input", // Not in use
 })
 
 // Shit that needs to be done when the site is first loaded
@@ -53,54 +53,55 @@ window.onload = async function() {
     });
 
     // Custom Method, returns all conversations as an array
-    let conversations = await generateConversations();
+    try {
+        conversations = await generateConversations();
 
-    // Render the Conversations
-    await conversations.forEach(conversation => {
-        conversation.render(conversationContainer);
-
-        // Make the conversations clickable
-        conversation.object.addEventListener('click', async function() {
-            // Removes the active Indicator of every conversation when one is clicked
-            conversations.forEach( c => { c.object.setAttribute("active", "false") });
-            activeConversation = conversation;
-            conversation.object.setAttribute("active", "true");
-            await updateMessages(activeConversation);
-            // Custom Method, scrolls down, takes force and behavior as inputs
-            updateScroll(true, 'instant');
+        // Render the Conversations
+        await conversations.forEach(conversation => {
+            conversation.render(conversationContainer);
         });
-    })
 
-    // Set the active Conversation, default is first in array
-    // Todo: Use GET Parameters to determine conversation, maybe by fetching database IDs
-    activeConversation = conversations[0];
-    activeConversation.object.setAttribute("active", "true");
+        // Set the active Conversation, default is first in array
+        // IMPORTANT do not remove that plus sign for gods sake
+        activeConversation = conversations.find(conversation => conversation.id === new URL(window.location.href).searchParams.get("conversation"));
+        activeConversation.object.setAttribute("active", "true");
 
-    // Loads all the Messages of the selected Conversion into memory
-    await updateMessages(activeConversation);
-    updateScroll(true, 'instant');
+        // Loads all the Messages of the selected Conversion into memory
+        await updateMessages(activeConversation);
+        updateScroll(true, 'instant');
+    }
 
-    // Set behavior of the query box
-    query = document.getElementById('query');
-    query.addEventListener('keydown', function(e) {
+    catch (e) {
+        if (e.message === "Unauthorized") {
+            window.location.href = `account/?action=login&cause=Unauthorized&redirect=${window.location.href}`;
+        }
+        console.log(e.message);
+        return;
+    }
+
+    // Set the behavior of the query box
+    let textarea = document.getElementById('query');
+    textarea.addEventListener('keydown', function(e) {
         // Detect if Enter is pressed and Shift isn't
         if (e.code === 'Enter' && !e.shiftKey)
         {
             // Suppress default behavior
             e.preventDefault();
             // Custom Function, sends a request to the specified backend Server
-            Request();
-            // Reset size, works half of the time
-            this.style.height = 'auto';
-            this.style.height = `min(${this.scrollHeight}px, 100px)`;
-            return false;
+            Request(this.value);
+            this.value = null;
+            // Reset size, works half of the time - minus 30 because of the padding
+            this.style.height = `${Math.min(this.scrollHeight, 100)}px`;
+            // Why the fuck do we return false here?
+            // return false;
         }
     });
 
     // Makes it scroll automatically
-    query.addEventListener('input', function(e) {
-        this.style.height = 'auto';
-        this.style.height = `min(${this.scrollHeight}px, 100px)`;
+    textarea.addEventListener('input', function(e) {
+
+        this.style.height = `${Math.min(this.scrollHeight, 100)}px`;
+        console.log(this.scrollHeight);
     });
 
     // The styling part
@@ -125,9 +126,7 @@ window.onload = async function() {
         
         // Apply Effect to messages and Conversations
         messageElements.forEach(messageElement => {
-            console.log(messageElement);
             if (messageElement.role === "assistant") {
-                console.log("Drawing highlight on assistant message");
                 drawMouseHighlight(messageElement.body, e.pageX, e.pageY, "rgb(136,255,255)", "white", 150);
                 // Optional Mouse highlight for Assistant header, looks better without it
                 // drawMouseHighlight(messageElement.header, e.pageX, e.pageY, '#25d80a', "#0a5fd8", 150);
