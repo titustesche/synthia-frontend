@@ -1,0 +1,11 @@
+# Docker stuff
+Dockerfile
+.dockerignore
+
+# IDE stuff
+.idea
+
+# Git Stuff
+.gitignore
+LICENSE
+README.md
