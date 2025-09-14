@@ -1,12 +1,16 @@
 :root {
     --outline-shape: #0EE1DAFF;
-    --font: "Moderustic", sans-serif;
+    --header-font: "Hikasami", sans-serif;
+    --code-text-font: "0xPropo", sans-serif;
+    --text-body-font: "AspektaVF", sans-serif;
     --primary-text-color: rgb(255, 255, 255);
     --secondary-text-color: rgb(255, 255, 255);
 }
 
 html {
-    font-family: var(--font);
+    font-family: var(--text-body-font);
+    font-weight: 500;
+    letter-spacing: 0.05em;
     font-size: 100%;
 }
 
@@ -84,10 +88,8 @@ body {
 
 /* Noise Texture no workee, fuck */
 .header, .sidebar, .main {
-    background-image: url('img/noise.webp');
-    background-size: 10vh;
     background-repeat: repeat;
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(20px);
     color: var(--primary-text-color);
     text-align: justify;
     line-height: 150%;
@@ -97,11 +99,6 @@ body {
     margin: 0;
     transition: backdrop-filter .2s;
     box-shadow: inset 0 0 500px rgba(255, 255, 255, 0.1);
-}
-
-.header:hover, .sidebar:hover, .main:hover {
-    backdrop-filter: blur(2px);
-    transition: backdrop-filter .2s;
 }
 
 .header {
@@ -128,13 +125,14 @@ body {
     display: flex;
     flex-direction: row;
     margin: 0 0.2rem;
+    min-width: fit-content;
 }
 
 .sidebar {
     grid-area: sidebar;
-    width: 15vw;
     height: 100%;
     border-right: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
 }
 
 .sidebar[centerItems] {
@@ -152,10 +150,7 @@ body {
     flex-grow: 1;
     padding: 20px;
     overflow-y: scroll;
-}
-
-#chatbox::-webkit-scrollbar {
-    display: none;
+    scrollbar-width: none;
 }
 
 @property --angle{
@@ -171,17 +166,16 @@ body {
     color: white;
     border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-right: none;
     position: relative;
     bottom: 0;
     left: 0;
     margin: 0 20px 20px 20px;
+    padding: 15px 0 15px 15px;
 }
 
 #ui_wrapper button {
     border-radius: 0 15px 15px 0;
     border: none;
-    border-right: 1px solid grey;
     background-color: transparent;
     font-size: 25px;
     height: 100%;
@@ -221,7 +215,9 @@ body {
 }
 
 .conversation::after {
-    background: rgba(83, 83, 83, 0.07);
+    background-image: url('img/noise.webp'), linear-gradient(rgba(127, 127, 127, 0.1), rgba(127, 127, 127, 0.1));
+    background-blend-mode: multiply;
+    background-size: 5vh;
     backdrop-filter: blur(10px);
     box-shadow: inset 0 0 25px rgba(255, 255, 255, 0.18);
 
@@ -249,15 +245,18 @@ body {
     font-family: sans-serif;
     font-size: 100%;
     resize: none;
-    overflow: visible;
     background-color: transparent;
     border: none;
     color: white;
     outline: none;
-    padding: 15px 0 15px 15px;
+    padding: 0;
+    margin: 0;
 }
 
 .msg_assistant, .msg_user {
+    background-image: url('img/noise.webp'), linear-gradient(rgba(127, 127, 127, 0.1), rgba(127, 127, 127, 0.1));
+    background-blend-mode: multiply;
+    background-size: 3vh;
     font-size: 0.9em;
     width: fit-content;
     max-width: 60%;
@@ -320,14 +319,12 @@ body {
 .pyout {
     background-color: black;
     color: #bfbfbf;
-    font-family: "Source Code Pro", monospace;
+    font-family: "0xPropo", monospace;
     line-height: 110%;
     font-size: 90%;
     border-radius: 5px;
     padding: 0;
-    width: fit-content;
-    max-width: 100%;
-    min-width: 15em;
+    width: 100%;
     border: 1px solid #808080;
     overflow: hidden;
     display: block;
@@ -335,7 +332,7 @@ body {
 
 .pyout_result {
     margin: 5px 0 5px 10px;
-    max-height: 150px;
+    height: fit-content;
     overflow-y: scroll;
     text-align: left;
 }
@@ -409,7 +406,6 @@ body {
 }
 
 .spacer {
-    font-size: 1.5em;
     padding: 0 1rem 0 1rem;
 }
 
