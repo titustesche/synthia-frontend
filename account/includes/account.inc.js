@@ -25,10 +25,6 @@ async function login() {
             throw new Error(response.statusText);
         }
 
-        // Otherwise, store the token as a cookie
-        const result = await response.json();
-        // sessionStorage.setItem('token', result.token);
-
         // Bring user back to main page
         const localUrl = new URL(this.location.href);
         const urlParams = new URLSearchParams(localUrl.search);
