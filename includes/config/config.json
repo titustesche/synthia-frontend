@@ -26,15 +26,22 @@
         }
       }
     },
-    "idle-speed": 0.3,
-    "activity-speed": 1.0,
-    "idle-turbulence": 1.5,
-    "activity-turbulence": 3.5,
-    "idle-corruption": 0.0,
-    "activity-corruption": 0.0
+    "idleSpeed": 0.3,
+    "activitySpeed": 1.0,
+    "idleTurbulence": 1.5,
+    "activityTurbulence": 3.5,
+    "idleCorruption": 0.0,
+    "activityCorruption": 0.0
   },
   "chat": {
-    "user-color": "#00ff00",
-    "assistant-color": "#0000ff"
+    "userColor": "#00ff00",
+    "assistantColor": "#0000ff",
+    "userName": "User",
+    "assistantName": "Assistant"
+  },
+  "api": {
+    "backendUrl": "http://localhost:3000",
+    "ollamaUrl": "http://localhost:11434",
+    "model": "gpt-oss"
   }
 }
