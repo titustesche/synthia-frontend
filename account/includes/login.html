@@ -1,0 +1,62 @@
+<h2 id="title-header">Welcome, new user!</h2>
+<div id="input-container">
+    <form id="login-form" method="POST" action="javascript:login()">
+        <label>
+            <input name="email" type="text" placeholder="E-Mail Address" autofocus required/>
+        </label>
+        <label>
+            <input name="password" type="password" placeholder="Password" required/>
+        </label>
+        <button type="submit">Login</button>
+        <br >
+        <a href="?page=resetPassword">Forgot Password?</a>
+    </form>
+</div>
+
+<style>
+    #title-header {
+        font-size: 2rem;
+    }
+
+    #input-container {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        width: 70%;
+        height: auto;
+        overflow: hidden;
+        border: 1px solid #ccc;
+        padding: 5% 0 5% 0;
+        border-radius: 5px;
+        box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), inset 0 0 50px rgba(229, 101, 255, 0.2);
+        backdrop-filter: blur(20px);
+
+        a {
+            text-align: left;
+            display: inline-block;
+            width: 80%;
+            color: #fff;
+        }
+
+        input, button {
+            width: 80%;
+            height: 3rem;
+            padding: 10px;
+            margin: 5px 10px 5px 10px;
+            box-sizing: border-box;
+            text-align: center;
+            background: transparent;
+            font-size: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            color: #fff;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 20px rgba(91, 240, 255, 0.2);
+            backdrop-filter: blur(20px);
+            font-weight: bold;
+        }
+
+        input:focus, button:focus {
+            outline: none;
+        }
+    }
+</style>
