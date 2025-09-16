@@ -1,4 +1,4 @@
-window.onload = async () => {
+async function loadDynamicContent() {
     const params = new URLSearchParams(window.location.search);
     const wrapper = document.getElementById('content-wrapper');
     let content;
@@ -17,4 +17,8 @@ window.onload = async () => {
         })
     // Display the loaded content
     wrapper.innerHTML = content;
+}
+
+window.onload = async () => {
+    await loadDynamicContent();
 }
