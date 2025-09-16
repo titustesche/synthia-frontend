@@ -38,11 +38,33 @@ const codes = Object.freeze({
     ERROR: 1, // Program exit code
     WRITING: "Writing", // Instructions for displaying
     RUNNING: "Running", // Instructions for displaying
-    INPUT_REQUIRED: "Waiting for Input", // Not in use
+    INPUT_REQUIRED: "Waiting for user Input", // Not in use
 })
 
 // Shit that needs to be done when the site is first loaded
 window.onload = async function() {
+    // Load config from settings.json
+    await fetch('includes/config/config.json')
+        .then(response => response.json())
+        .then(result => {
+            window.config = result;
+        });
+
+    /* Todo: Make this resolve a global promise
+    window.configLoaded = new Promise(resolve => async () => {
+        window.config = await fetch('includes/config/config.json')
+            .then(res => res.json())
+            .then(result => {
+                console.log(result);
+                window.config = result;
+            })
+            .then(() => {
+                resolve(window.configLoaded)
+            });
+    });
+     */
+
+
     // Assign important Elements
     chatbox = document.getElementById('chatbox');
     conversationContainer = document.getElementsByClassName('sidebar-container')[0];
@@ -73,9 +95,9 @@ window.onload = async function() {
 
     catch (e) {
         if (e.message === "Unauthorized") {
+            // Redirect to the login page and keep a reference to the page the user came from
             window.location.href = `account/?action=login&cause=Unauthorized&redirect=${window.location.href}`;
         }
-        console.log(e.message);
         return;
     }
 
