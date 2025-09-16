@@ -181,12 +181,12 @@ class Message {
     // Also does what it says
     createHeader() {
         if (this.role === "user") {
-            this.header.innerText = userName;
+            this.header.innerText = window.config.chat.userName;
             this.header.style.color = "#25d80a";
         }
         
         else {
-            this.header.innerText = assistantName;
+            this.header.innerText = window.config.chat.assistantName;
             this.header.style.color = "#0a5fd8";
         }
     }
@@ -446,7 +446,7 @@ async function newConversation() {
     console.log(name);
 
     let conversation = new Conversation();
-    await fetch ("http://localhost:3000/conversation", {
+    await fetch (`${window.config.api.backendUrl}/conversation`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
