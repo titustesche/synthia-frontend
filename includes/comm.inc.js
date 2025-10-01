@@ -131,28 +131,22 @@ async function generateConversations() {
             "Content-Type": "application/json",
         },
         credentials: "include",
+    };
+
+    let response = await fetch(url, requestOptions);
+    if (response.status === 401) {
+        throw new Error("Unauthorized");
     }
 
-    try {
-        let response = await fetch(url, requestOptions);
-        if (response.status === 401) {
-            throw new Error("Unauthorized");
-        }
-
-        if (!response.ok) {
-            throw new Error("HTTP Error. Status: " + response.status);
-        }
-
-        const result = await response.json();
-        result.conversations.forEach(conversation => {
-            res.push(new Conversation(conversation.id, conversation.name));
-        });
-        return res;
+    if (!response.ok) {
+        throw new Error("HTTP Error. Status: " + response.status);
     }
 
-    catch (e) {
-        throw e;
-    }
+    const result = await response.json();
+    result.conversations.forEach(conversation => {
+        res.push(new Conversation(conversation.id, conversation.name));
+    });
+    return res;
 }
 
 // Requests all messages of a conversation from the backend
