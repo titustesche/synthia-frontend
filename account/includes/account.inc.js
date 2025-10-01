@@ -2,13 +2,42 @@ function load(page) {
     const url = new URL(window.location);
     const params = new URLSearchParams(url.search);
     if (params.get("page")) {
-        console.log("setting page")
         params.set("page", page);
     } else params.append("page", page);
 
     url.search = params.toString();
     history.pushState(null, "", url.toString());
+
+    // This theoretically returns a promise, but it can be ignored as of now
     loadDynamicContent();
+}
+
+async function logout() {
+    let url = `${window.config.api.backendUrl}/logout`;
+    let options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+    }
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error("Could not log out");
+        }
+
+        // Bring user back to main page
+        const localUrl = new URL(this.location.href);
+        const urlParams = new URLSearchParams(localUrl.search);
+        const redirect = urlParams.get('redirect');
+        if (redirect) window.location.href = urlParams.get('redirect');
+    }
+
+    catch (error) {
+        console.error(error);
+    }
 }
 
 async function register() {
@@ -20,7 +49,7 @@ async function register() {
     let options = {
         method: "POST",
         headers: {
-            ContentType: "application/json",
+            "Content-Type": "application/json",
         },
         body: JSON.stringify({
             username: registerForm.elements['username'].value,
@@ -30,18 +59,27 @@ async function register() {
         credentials: "include",
     }
 
+    // Try to contact the API
     try {
+        console.log("Requesting backend");
+        // Send request
         const response = await fetch(url, options);
-        if (response.ok) {
+        console.log("Request received");
+        // If the response wasn't ok
+        if (!response.ok) {
             throw new Error(response.statusText);
         }
 
+        // Bring user back to main page
         const localUrl = new URL(this.location.href);
         const urlParams = new URLSearchParams(localUrl.search);
-        window.location.href = urlParams.get("redirect");
+        const redirect = urlParams.get('redirect');
+        if (redirect) window.location.href = urlParams.get('redirect');
     }
 
+    // If the request failed
     catch (error) {
+        // Log the error
         console.error(error);
     }
 }
@@ -51,7 +89,7 @@ async function login() {
     const loginForm = document.getElementById('login-form');
 
     // Set API url and options
-    let url = 'http://localhost:3000/login';
+    let url = `${window.config.api.backendUrl}/login`;
     let options = {
         method: 'POST',
         headers: {
@@ -70,16 +108,18 @@ async function login() {
         const response = await fetch(url, options);
         // If the response wasn't ok, throw a new error
         if (!response.ok) {
-            throw new Error(response.statusText);
+            const json = await response.json();
+            throw new Error(json.error);
         }
 
         // Bring user back to main page
         const localUrl = new URL(this.location.href);
         const urlParams = new URLSearchParams(localUrl.search);
-        window.location.href = urlParams.get('redirect');
+        const redirect = urlParams.get('redirect');
+        if (redirect) window.location.href = urlParams.get('redirect');
     }
 
     catch (e) {
-        console.log(e);
+        console.error(e);
     }
 }
