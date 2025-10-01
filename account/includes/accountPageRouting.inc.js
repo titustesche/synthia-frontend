@@ -13,10 +13,27 @@ async function loadDynamicContent() {
         })
         .then(res => {
             // Assign error message to the res (yes this needs to be in its own .then because otherwise it will be a pending promise)
-            content = res;
-        })
-    // Display the loaded content
-    wrapper.innerHTML = content;
+            wrapper.innerHTML = res;
+
+            // --- Vibe coded start ---
+            // This makes sure scripts that are included in the loaded content are run
+            const scripts = document.querySelectorAll('script');
+
+            scripts.forEach((script) => {
+                const newScript = document.createElement('script');
+
+                if (script.src) newScript.src = script.src;
+                else newScript.textContent = script.textContent;
+
+                for (const attr of script.attributes) {
+                    newScript.setAttribute(attr.name, attr.value);
+                }
+
+                script.parentNode.replaceChild(newScript, script);
+
+                // --- Vibe coded end ---
+            })
+        });
 }
 
 window.onload = async () => {
