@@ -40,6 +40,13 @@ class Conversation {
         this.object.className = "conversation";
         this.object.innerText = this.name;
         this.addOnClick();
+
+        // Add hover effect
+        let textColor = getComputedStyle(cssRoot).getPropertyValue('--primary-text-color');
+        // This has to be the entire page; otherwise it won't disappear
+        document.getElementsByTagName('body')[0].addEventListener("mousemove", (e) => {
+            drawMouseHighlight(this.object, e.pageX, e.pageY, "rgba(110,20,205,0.5)", textColor, 60);
+        })
     }
 }
 
@@ -65,9 +72,11 @@ class Message {
     pyoutResult;
     pyoutCode;
     pyoutHeader;
+
+    //
     contentQueue = [""];
     isRendering = false;
-    blocks = {};
+    blocks = [{}];
 
     // The message outline's attributes
     // Todo: Implement these somehow?
@@ -103,6 +112,23 @@ class Message {
         this._outlineShape = "#ffffffff";
         this.object.setAttribute("outline", this._outline);
         cssRoot.style.setProperty("--outline-shape", this._outlineShape);
+
+        // Add the mouse hover effect when a message is created
+        // This should be more performant then the previous method
+
+        // This has to be the entire body; otherwise it won't disappear
+        document.getElementsByTagName('body')[0].addEventListener('mousemove', (e) => {
+            let textColor = getComputedStyle(cssRoot).getPropertyValue('--primary-text-color');
+
+            switch (this.role) {
+                case "assistant":
+                    drawMouseHighlight(this.body, e.pageX, e.pageY, "rgb(136,255,255)", textColor, 150);
+                    break;
+
+                case "user":
+                    drawMouseHighlight(this.body, e.pageX, e.pageY, "rgb(150,202,107)", textColor, 150);
+            }
+        })
 
         // Force scroll if it's a user message
         if (this.role === "user") { updateScroll(true); }
@@ -148,7 +174,7 @@ class Message {
                 break;
         }
 
-        // Todo: This has to undergo some revision to support any type of content
+        // Todo: This has to undergo some revision to support any given type of content
         // Add new content to the queue
         /*
         if (content !== undefined) this.contentQueue.push(content);
@@ -159,10 +185,10 @@ class Message {
         this.isRendering = true;
 
         // If not, start rendering by:
-        // Create a copy of the content queue so avoid modification related issues
+        // Create a copy of the content queue to avoid modification related issues
         let cqCopy = this.contentQueue.slice(0);
 
-        // Loop through each word
+        // Loop through each word0
         for (let word of cqCopy) {
             // And each character of that word
             for (let char of word) {
@@ -218,6 +244,7 @@ class Message {
     pushResult(result) {
         this.pyoutResult.textContent += result;
         this.pyoutResult.scrollTop = this.pyoutResult.scrollHeight;
+        this.pyoutResult.setAttribute("textCursor", "false");
         updateScroll();
     }
     
