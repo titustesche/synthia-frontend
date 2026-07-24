@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="../Styles/index.css" rel="stylesheet">
+    <link href="../Styles/Modal.css" rel="stylesheet">
+    <link href="../Styles/TextInput.css" rel="stylesheet">
+    <link href="../Styles/Popup.css" rel="stylesheet">
+    <link href="../Styles/Button.css" rel="stylesheet">
+    <link href="../Styles/Sidebar.css" rel="stylesheet">
+    <link href="../Styles/Header.css" rel="stylesheet">
+    <script src="../index.js" type="module"></script>
+    <title>Title</title>
+</head>
+    <body>
+    <div id="popup-container"></div>
+        <div id="layout-grid">
+            <div class="header main-layout">
+                <p class="title">Header</p>
+                <div id="accent-color-picker-container">
+                    <input type="color" id="accent-color-picker">
+                </div>
+            </div>
+            <div id="sidebar" class="sidebar main-layout"><p class="title">Conversations</p></div>
+            <div class="chat main-layout empty">
+                <div id="message-container"></div>
+                <div id="prompt-input">
+                    <textarea placeholder="Type your message here..."></textarea>
+                    <select>
+                        <option>Select Model</option>
+                    </select>
+                    <button>Send</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
