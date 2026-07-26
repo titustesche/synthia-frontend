@@ -9,6 +9,8 @@
     <link href="../Styles/Button.css" rel="stylesheet">
     <link href="../Styles/Sidebar.css" rel="stylesheet">
     <link href="../Styles/Header.css" rel="stylesheet">
+    <link href="../Styles/PromptInput.css" rel="stylesheet">
+    <link href="../Styles/Message.css" rel="stylesheet">
     <script src="../index.js" type="module"></script>
     <title>Title</title>
 </head>
@@ -22,14 +24,14 @@
                 </div>
             </div>
             <div id="sidebar" class="sidebar main-layout"><p class="title">Conversations</p></div>
-            <div class="chat main-layout empty">
+            <div id="chat-container" class="chat main-layout empty">
                 <div id="message-container"></div>
-                <div id="prompt-input">
-                    <textarea placeholder="Type your message here..."></textarea>
-                    <select>
+                <div id="prompt-input-container">
+                    <textarea id="prompt-input" placeholder="Type your message here..."></textarea>
+                    <select id="prompt-model-select">
                         <option>Select Model</option>
                     </select>
-                    <button>Send</button>
+                    <button id="prompt-send-button">Send</button>
                 </div>
             </div>
         </div>

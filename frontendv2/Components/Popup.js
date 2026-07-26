@@ -1,4 +1,4 @@
-import {DomRegister} from "../Services/DomRegister.js";
+import {DomRegister} from "../Static/DomRegister.js";
 
 export class Popup {
     static info(title, message, timeout = 5) {

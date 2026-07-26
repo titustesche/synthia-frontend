@@ -3,13 +3,13 @@ import {Popup} from "../Components/Popup.js";
 
 export const userService = {
     isLoggedIn: false,
-    user: { uuid: null, username: null, email: null },
+    user: { id: null, username: null, email: null },
 
     ensureLogin: async () => {
         const loggedInUser = JSON.parse(localStorage.getItem("user"));
         if (loggedInUser) {
             if (
-                loggedInUser.hasOwnProperty('uuid')
+                loggedInUser.hasOwnProperty('id')
                 && loggedInUser.hasOwnProperty('username')
                 && loggedInUser.hasOwnProperty('email')
             ) {
@@ -29,7 +29,7 @@ export const userService = {
         try {
             const user = await API_ADAPTER.loginUser(email, password);
             if (
-                user.hasOwnProperty('uuid')
+                user.hasOwnProperty('id')
                 && user.hasOwnProperty('username')
                 && user.hasOwnProperty('email')) {
                 userService.user = user;

@@ -6,8 +6,12 @@ import {Button} from "./Components/Button.js";
 import { Popup } from "./Components/Popup.js";
 import {SidebarService} from "./Services/SidebarService.js";
 import {ICONS} from "./Static/Icons.js";
-import {HeaderService as HeaderServide} from "./Services/HeaderService.js";
-import {SettingsManager} from "./Services/SettingsManager.js";
+import {HeaderService} from "./Services/HeaderService.js";
+import {SettingsManager} from "./Managers/SettingsManager.js";
+import {Conversation} from "./Components/Conversation.js";
+import {PromptInput} from "./Managers/PromptInputManager.js";
+import {ConversationManager} from "./Managers/ConversationManager.js";
+import {LlmProviderManager} from "./Managers/LLMProviderManager.js";
 
 window.onload = async () => {
     try { await API_ADAPTER.ensureBackendConnection(); }
@@ -18,7 +22,7 @@ window.onload = async () => {
 
     SettingsManager.loadSettings();
     SidebarService.setupSidebar();
-    HeaderServide.setupHeader();
+    HeaderService.setupHeader();
 
     await UserService.ensureLogin();
     if (!UserService.isLoggedIn) {
@@ -57,13 +61,27 @@ window.onload = async () => {
         await modal.render();
     }
 
+    await LlmProviderManager.loadProviders();
+    console.log(`Providers count: ${LlmProviderManager.Providers.length}`);
+    if (LlmProviderManager.Providers.length === 0) {
+        await LlmProviderManager.createProvider();
+    }
+
     try {
-        // Todo: Conversation Manager
-        const conversations = await API_ADAPTER.getConversations();
-        SidebarService.setConversations(conversations);
+        let conversations = await API_ADAPTER.getConversations();
+        conversations = conversations.map((conversation) => new Conversation(conversation));
+        ConversationManager.Conversations = conversations;
+
+        let params = new URLSearchParams(window.location.search);
+        if (params.has("conversation")) {
+            await ConversationManager.SetActiveConversation(params.get("conversation"));
+        }
+
+        await PromptInput.init();
+        await PromptInput.populateModelSelect(SettingsManager.providerUrls);
     }
 
     catch (e) {
-        Popup.debug("Fetching Conversations failed", e.message);
+        Popup.debug("Initialization failed", e.message);
     }
 }

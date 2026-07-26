@@ -9,7 +9,7 @@
 #accent-color-picker-container {
     overflow: hidden;
     border-radius: var(--round-border-radius);
-    border: var(--border-width) solid var(--border-color);
+    border: var(--thick-border-width) solid var(--text-color);
     width: 2rem;
     height: 2rem;
     cursor: pointer;

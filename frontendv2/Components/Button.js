@@ -14,6 +14,7 @@ export class Button {
 
         this._container = document.createElement("div");
         this._container.id = inputDetails.identifier;
+        for (let name of inputDetails.className?.split(" ") ?? "") this._container.classList.add(name);
         this._container.classList.add("button-container");
 
         if (inputDetails.icon) {
