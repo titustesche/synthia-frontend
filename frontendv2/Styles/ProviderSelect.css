@@ -1,0 +1,30 @@
+.provider-select-provider-container {
+    display: grid;
+    grid-template-areas:
+    "name name list-endpoint chat-endpoint"
+    "url port token token"
+    "remove remove remove remove";
+    gap: 1rem;
+
+    input {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        border: var(--border-width) solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 0.5rem;
+    }
+
+    input:focus {
+        outline: none;
+    }
+}
+
+.provider-select-provider-name { grid-area: name; }
+.provider-select-provider-url { grid-area: url; }
+.provider-select-provider-port { grid-area: port; }
+.provider-select-provider-token { grid-area: token; }
+.provider-select-provider-list-endpoint { grid-area: list-endpoint; }
+.provider-select-provider-chat-endpoint { grid-area: chat-endpoint; }
+#provider-select-provider-remove-button {
+    grid-area: remove;
+}
