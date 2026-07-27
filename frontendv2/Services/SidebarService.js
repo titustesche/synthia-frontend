@@ -38,32 +38,6 @@ export const SidebarService = {
                 });
 
                 ConversationManager.ClearActiveConversation();
-
-                /*
-                const modal = new Modal("Create Conversation", [name, new Button(undefined,{
-                    identifier: "submit",
-                    text: "Create",
-                    onClick: async () => {
-                        try {
-                            if (!name.value) throw new Error("Name is required");
-                            API_ADAPTER.createConversation(name.value)
-                                .then(() => {
-                                    // SidebarService.setConversations([...SidebarService.conversations, conversations]);
-                                    modal.destroy();
-                                })
-                                .catch((reason) => {
-                                    Popup.error("Could not create conversation", reason);
-                                })
-                        }
-                        catch (e) {
-                            Popup.error("Could not create conversation", e.message);
-                        }
-                    }
-                })], {
-                    canBeClosedManually: true
-                });
-                await modal.render();
-                 */
             }
         });
 
