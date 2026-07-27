@@ -30,11 +30,11 @@
 
 :root {
 
-    --background-color: #ffffff;
-    --dark-background-color: #f5f5f5;
-    --darker-background-color: #eeeeee;
+    --light-background-color: hsl(from var(--accent-color) calc(h + 10) calc(s * 0.15) 98%);
+    --background-color: hsl(from var(--accent-color) calc(h - 10) calc(s * 0.2) 95%);
+    --dark-background-color: hsl(from var(--accent-color) calc(h - 20) calc(s * 0.25) 91%);
 
-    --background-gradient: radial-gradient(var(--accent-color), var(--background-color) 70%);
+    --background-gradient: radial-gradient(circle at 20% 20%, var(--tertiary-accent), var(--light-background-color) 70%);
 
     --text-color: #1e1e1e;
     --text-color-muted: #6c6c6c;
@@ -67,11 +67,9 @@
     }
 
     @media (prefers-color-scheme: dark) {
-        --background-color: #1f1f1f;
-        --dark-background-color: #191919;
-        --darker-background-color: #121212;
-
-        --background-gradient: radial-gradient(var(--tertiary-accent), var(--background-color) 70%);
+        --light-background-color: hsl(from var(--accent-color) calc(h + 10) calc(s * 0.2) 12%);
+        --background-color: hsl(from var(--accent-color) calc(h - 10) calc(s * 0.2) 10%);
+        --dark-background-color: hsl(from var(--accent-color) calc(h - 20) calc(s * 0.2) 7%);
 
         --text-color: #e1e1e1;
         --text-color-muted: #8c8c8c;
@@ -89,9 +87,7 @@
 
 body {
     background: var(--background-gradient);
-    background-color: var(--background-color);
-    background-size: 75% 75%;
-    background-position: -75% -75%;
+    background-color: var(--light-background-color);
     background-repeat: no-repeat;
     color: var(--text-color);
     margin: 0;
@@ -117,7 +113,7 @@ body {
     grid-auto-rows: auto 1fr;
 
     div.main-layout {
-        background-color: var(--darker-background-color);
+        background-color: var(--dark-background-color);
         margin: 0.2rem;
         padding: 1rem;
         border-radius: var(--border-radius);
