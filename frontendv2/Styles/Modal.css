@@ -22,7 +22,7 @@
 
 .modal-container {
     border-radius: var(--border-radius);
-    background: var(--dark-background-color);
+    background: var(--background-color);
     min-width: 35vw;
     min-height: 20vh;
     padding: 2rem;
