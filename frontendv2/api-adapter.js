@@ -1,22 +1,26 @@
 import {userService} from "./Services/UserService.js";
 
-export const API_ADAPTER = {
-    api_url: "http://localhost:5116",
+export class API_ADAPTER {
+    static HTTPS = false;
+    static API_URL = "localhost:5116";
+    static API_HTTP_URL = `${API_ADAPTER.HTTPS ? "https" : "http"}://${API_ADAPTER.API_URL}`;
+    static WS_URL = `${API_ADAPTER.HTTPS ? "wss" : "ws"}://${API_ADAPTER.API_URL}/ws`;
 
-    ensureBackendConnection: async () => {
-        const res = await fetch(`${API_ADAPTER.api_url}/status`, {
+    static async ensureBackendConnection() {
+        return await fetch(`${API_ADAPTER.API_HTTP_URL}/status`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
             },
-        });
+        })
+            .then(response => {
+                return response.ok;
+            })
+            .catch(() => false)
+    }
 
-        return res.ok;
-
-    },
-
-    verifyUser: (email, password) => {
-        return fetch(`${API_ADAPTER.api_url}/user/verify`, {
+    static verifyUser(email) {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/user/verify`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -28,9 +32,10 @@ export const API_ADAPTER = {
         }).then(response => {
             return response.ok;
         })
-    },
-    loginUser: (email, password) => {
-        return fetch(`${API_ADAPTER.api_url}/user/login`, {
+    }
+
+    static loginUser(email, password) {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/user/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -44,9 +49,10 @@ export const API_ADAPTER = {
                 if (!response.ok) throw new Error("Could not login user");
                 return response.json();
             })
-    },
-    createConversation: (conversation) => {
-        return fetch(`${API_ADAPTER.api_url}/conversation/create`, {
+    }
+
+    static createConversation(conversation) {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/conversation/create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -59,9 +65,10 @@ export const API_ADAPTER = {
                 if (!response.ok) throw new Error(await response.text());
                 return await response.json();
             });
-    },
-    async getConversations() {
-        return fetch(`${API_ADAPTER.api_url}/conversation/list-owned/${userService.user.id}`, {
+    }
+
+    static async getConversations() {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/conversation/list-owned/${userService.user.id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -74,10 +81,11 @@ export const API_ADAPTER = {
                 }
                 return response.json();
             })
-    },
-    getModels(providerUrls = []) {
-        return fetch(`${API_ADAPTER.api_url}/model/list`, {
-            method: "POST",
+    }
+
+    static getModels() {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/model/list`, {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -86,9 +94,10 @@ export const API_ADAPTER = {
                 if (!response.ok) throw new Error(response.statusText);
                 return response.json();
             })
-    },
-    getMessages(conversationId) {
-        return fetch(`${API_ADAPTER.api_url}/message/list/${conversationId}`, {
+    }
+
+    static getMessages(conversationId) {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/message/list/${conversationId}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -101,22 +110,24 @@ export const API_ADAPTER = {
                 }
                 return response.json();
             })
-    },
-    sendMessage: (message, model) => {
-        return fetch(`${API_ADAPTER.api_url}/message/send`, {
+    }
+
+    static sendMessage(message, model, provider) {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/message/send`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({messageDto: message, model: model}),
+            body: JSON.stringify({messageDto: message, model: model, provider: provider}),
         })
             .then(response => {
                 if (!response.ok) throw new Error(response.statusText);
                 return response.json();
             })
-    },
-    createLlmProvider: (provider) => {
-        return fetch(`${API_ADAPTER.api_url}/llm-provider/create`, {
+    }
+
+    static createLlmProvider(provider) {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/llm-provider/create`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -127,9 +138,10 @@ export const API_ADAPTER = {
                 if (!response.ok) throw new Error(response.statusText);
                 return response.json();
             })
-    },
-    getLlmProviders: () => {
-        return fetch(`${API_ADAPTER.api_url}/llm-provider/list`, {
+    }
+
+    static getLlmProviders() {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/llm-provider/list`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
