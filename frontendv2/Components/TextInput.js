@@ -69,11 +69,11 @@ export class TextInput {
             this._container.appendChild(this._censoringOverlay);
 
             this.censorInput = inputDetails.censorInput;
-            this._revealContentButton.innerHTML = this.censorInput ? ICONS.eyeOpen : ICONS.eyeClosed;
+            this._revealContentButton.innerHTML = this.censorInput ? ICONS.EYE_OPEN : ICONS.EYE_CLOSED;
             this._revealContentButton.addEventListener("click", () => {
                 this.censorInput = !this.censorInput;
                 this._revealContentButton.classList.toggle("visible", this.censorInput);
-                this._revealContentButton.innerHTML = this.censorInput ? ICONS.eyeOpen : ICONS.eyeClosed;
+                this._revealContentButton.innerHTML = this.censorInput ? ICONS.EYE_OPEN : ICONS.EYE_CLOSED;
             });
             this._container.appendChild(this._revealContentButton);
         }
