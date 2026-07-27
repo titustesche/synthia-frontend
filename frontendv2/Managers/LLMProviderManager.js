@@ -5,7 +5,7 @@ import {API_ADAPTER} from "../api-adapter.js";
 import {Popup} from "../Components/Popup.js";
 
 export class LlmProviderManager {
-    static _providers = [];
+    static _providers = {};
     static get Providers() { return LlmProviderManager._providers; }
 
     static async createProvider() {
