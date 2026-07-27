@@ -40,7 +40,7 @@
     "assistantName": "Assistant"
   },
   "api": {
-    "backendUrl": "http://localhost:3000",
+    "backendUrl": "http://localhost:5116",
     "ollamaUrl": "http://localhost:11434",
     "model": "gpt-oss"
   }

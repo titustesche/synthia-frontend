@@ -48,6 +48,25 @@ async function initSite() {
     conversationContainer = document.getElementsByClassName('sidebar-container')[0];
     cssRoot = document.documentElement;
 
+    const modelSelect = document.getElementById("model-select");
+    let response = await fetch(`${window.config.api.backendUrl}/model/list`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({providerUrls: ["http://localhost:11434/api/tags"]}),
+    });
+
+    if (response.ok) {
+        for (let model of await response.json()) {
+            modelSelect.options.add(new Option(model.name));
+        }
+    }
+
+    modelSelect.addEventListener("change", async () => {
+        window.config.api.model = modelSelect.options[modelSelect.selectedIndex].text;
+    })
+
     document.getElementById("conversation-wrapper").addEventListener("scroll", () => {
         updateOpacity();
     });

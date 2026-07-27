@@ -35,6 +35,7 @@ async function logout() {
         if (redirect) window.location.href = urlParams.get('redirect');
     }
 
+
     catch (error) {
         console.error(error);
     }
@@ -52,7 +53,7 @@ async function register() {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            username: registerForm.elements['username'].value,
+            name: registerForm.elements['username'].value,
             email: registerForm.elements['email'].value,
             password: registerForm.elements['password'].value,
         }),

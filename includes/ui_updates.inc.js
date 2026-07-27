@@ -23,7 +23,7 @@ class Conversation {
             const url = new URL(window.location.href);
             const params = new URLSearchParams(url.search);
             params.set("conversation", this.id);
-            window.history.pushState({}, "", `?${params}`);
+            window.history.replaceState({}, "", `?${params}`);
             for (let conversation of Conversation.conversations) {
                 if (conversation.object) conversation.object.setAttribute("active", "false");
             }
@@ -492,6 +492,7 @@ async function newConversation() {
     conversation.render(conversationContainer);
 }
 
+// Make Elements in the conversation view fade when they reach the bottom of their parent
 async function updateOpacity() {
     let container = document.getElementById("conversation-wrapper");
     let containerTransform = container.getBoundingClientRect();
@@ -512,5 +513,3 @@ async function updateOpacity() {
         // Geez, it's not even noticeable :(
     }
 }
-
-// Make Elements in the conversation view fade when they reach the bottom of their parent
