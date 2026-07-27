@@ -89,8 +89,8 @@ export class PromptInput {
         await ConversationManager.SendMessage(message, this.GetSelectedModel());
     }
 
-    static async populateModelSelect(providerUrls){
-        const models = await API_ADAPTER.getModels(providerUrls);
+    static async populateModelSelect(){
+        const models = await API_ADAPTER.getModels();
         models.forEach(model => {
             const option = document.createElement("option");
             option.value = model.name;
