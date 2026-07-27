@@ -3,7 +3,7 @@
     position: absolute;
     gap: 0.5rem;
     width: 70%;
-    background-color: var(--dark-background-color);
+    background-color: var(--background-color);
     padding: 1rem 1rem 1rem 1rem;
     border-radius: var(--round-border-radius);
     border: var(--border-width) solid var(--border-color);
@@ -92,7 +92,7 @@
 
 #prompt-send-button {
     background-color: var(--secondary-accent) !important;
-    color: var(--background-color) !important;
+    color: var(--light-background-color) !important;
     padding: 0.25rem 0.5rem;
     cursor: pointer !important;
     transition: background-color var(--short-animation-duration) ease;

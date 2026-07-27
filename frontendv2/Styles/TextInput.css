@@ -4,7 +4,7 @@
     padding: 1rem;
     border-radius: var(--round-border-radius);
     border: var(--border-width) solid var(--border-color);
-    background-color: var(--darker-background-color);
+    background-color: var(--dark-background-color);
     overflow: hidden;
 
     .text-input {
@@ -37,15 +37,14 @@
         width: max-content;
         height: 100%;
         padding: inherit;
+        background-size: 200% 100%;
         background: linear-gradient(
                 to left,
                 var(--text-color-muted) 40%,
                 var(--text-color) 45%,
                 var(--text-color) 55%,
                 var(--text-color-muted) 60%
-        );
-        background-size: 200% 100%;
-        background-position: 0 0;
+        ) 0 0;
         background-clip: text;
         animation: censoring-animation 3s linear infinite;
         color: transparent;
@@ -87,7 +86,7 @@
     top: 50%;
     transform: translateY(-50%);
     background-color: transparent;
-    background-image: linear-gradient(to left, var(--darker-background-color) 75%, transparent);
+    background-image: linear-gradient(to left, var(--dark-background-color) 75%, transparent);
     border: none;
     cursor: pointer;
     color: var(--text-color);
