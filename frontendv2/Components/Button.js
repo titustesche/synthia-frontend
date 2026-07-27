@@ -32,8 +32,8 @@ export class Button {
 
         this.onClick = inputDetails.onClick;
 
-        this._container.addEventListener("click", () => {
-            this.onClick();
+        this._container.addEventListener("click", (event) => {
+            this.onClick(event);
         })
     }
 
