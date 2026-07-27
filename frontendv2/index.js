@@ -12,11 +12,32 @@ import {Conversation} from "./Components/Conversation.js";
 import {PromptInput} from "./Managers/PromptInputManager.js";
 import {ConversationManager} from "./Managers/ConversationManager.js";
 import {LlmProviderManager} from "./Managers/LLMProviderManager.js";
+import {WebSocketManager} from "./Managers/WebSocketManager.js";
+import {BodyText} from "./Components/BodyText.js";
 
 window.onload = async () => {
-    try { await API_ADAPTER.ensureBackendConnection(); }
+    let httpOk = await API_ADAPTER.ensureBackendConnection();
+    let wsOk = false;
+
+    try {
+
+        if (!httpOk) throw new Error("HTTP connection failed");
+        WebSocketManager.connectOrFail();
+        wsOk = true;
+    }
     catch (e) {
-        await new Modal("Could not connect to backend", [], { canBeClosedManually: false }).render();
+        await new Modal("Could not connect to backend", [
+            new BodyText(undefined, {
+                identifier: "http-status",
+                text: httpOk ? "HTTP: OK" : "HTTP: Unreachable",
+                className: "http-status"
+            }),
+            new BodyText(undefined, {
+                identifier: "ws-status",
+                text: wsOk ? "WS: OK" : "WS: Disconnected",
+                className: "ws-status"
+            })
+        ], { canBeClosedManually: false }).render();
         return;
     }
 
@@ -39,7 +60,7 @@ window.onload = async () => {
         Popup.debug("Not logged in", "You need to login first to access this page");
         const modal =  new Modal("You need to log in", [emailInput, passwordInput,
             new Button(undefined, {
-                icon: ICONS.createIcon,
+                icon: ICONS.CREATE,
                 identifier: "submit",
                 text: "Login",
                 onClick: async () => {
@@ -62,8 +83,9 @@ window.onload = async () => {
     }
 
     await LlmProviderManager.loadProviders();
-    console.log(`Providers count: ${LlmProviderManager.Providers.length}`);
-    if (LlmProviderManager.Providers.length === 0) {
+    console.log(`Providers count: ${Object.keys(LlmProviderManager.Providers).length}`);
+    console.log(LlmProviderManager.Providers);
+    if (Object.keys(LlmProviderManager.Providers).length === 0) {
         await LlmProviderManager.createProvider();
     }
 
