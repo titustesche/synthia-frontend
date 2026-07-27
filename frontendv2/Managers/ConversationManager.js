@@ -77,6 +77,7 @@ export class ConversationManager {
             }
 
             this.Empty = conversation.messages.length === 0;
+            return;
         }
 
         throw new Error("Conversation does not exist");
@@ -117,7 +118,9 @@ export class ConversationManager {
 
         message.conversation = this._activeConversation;
 
-        await API_ADAPTER.sendMessage(message.toApiMessage(), model)
+        const provider = this._activeConversation.selectedModel?.provider;
+
+        await API_ADAPTER.sendMessage(message.toApiMessage(), model, provider)
             .then(response => {
                 message = new Message(response);
                 this._activeConversation.messages = [...this._activeConversation.messages, message];
