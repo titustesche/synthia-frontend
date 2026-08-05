@@ -3,6 +3,9 @@ import {API_ADAPTER} from "../api-adapter.js";
 import {ConversationManager} from "./ConversationManager.js";
 import {Popup} from "../Components/Popup.js";
 import {Message} from "../Components/Message.js";
+import {Modal} from "../Components/Modal.js";
+import {ModelSelect} from "../Components/ModelSelect.js";
+import {TextInput} from "../Components/TextInput.js";
 
 export class PromptInput {
     static container = DomRegister.promptInput.container;
@@ -10,22 +13,26 @@ export class PromptInput {
     static modelSelect = DomRegister.promptInput.modelSelect;
     static sendButton = DomRegister.promptInput.sendButton;
 
+    static ModelSelectModal = undefined;
+
     static InputMaxHeight = 250;
 
-    static Models = {};
+    static _models = {};
+    static get Models() { return this._models; }
+    static set Models(value) { this._models = value; }
 
-    static GetSelectedModel() {
-        return PromptInput.Models[PromptInput.modelSelect.value] ?? undefined;
-    }
+    static _model;
 
-    static SetModel(modelName) {
-        if (!modelName) this.modelSelect.selectedIndex = 0;
-        this.modelSelect.value = modelName;
+    static set Model(value) {
+        this._model = value;
+        this.modelSelect.innerText = value.name;
+        ConversationManager.SetModel(value);
     }
+    static get Model() { return this._model; }
 
     static UpdateSendButtonState() {
         const input = this.input.value;
-        const selectedModel = this.GetSelectedModel();
+        const selectedModel = this.Model;
 
         if (input.length > 0 && selectedModel) {
             this.sendButton.classList.remove("disabled");
@@ -52,7 +59,7 @@ export class PromptInput {
             }
         });
 
-        this.input.addEventListener("input", (e) => {
+        this.input.addEventListener("input", () => {
             this.UpdateInputHeight();
             this.UpdateSendButtonState()
         });
@@ -69,11 +76,22 @@ export class PromptInput {
             }
         })
 
-        this.modelSelect.addEventListener("change", (e) => {
-            const modelName = e.target.value;
-            if (modelName in PromptInput.Models)
-                ConversationManager.SetModel(PromptInput.Models[modelName]);
-            this.UpdateSendButtonState();
+        this.modelSelect.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (this.ModelSelectModal) this.ModelSelectModal.destroy();
+            this.ModelSelectModal = new Modal("Select Model", [
+                new ModelSelect(undefined, {
+                    identifier: "model-select",
+                    placeholder: "Model",
+                    models: PromptInput.Models,
+                    selectedModel: PromptInput.Model ?? undefined,
+                    onModelChange: (model) => {
+                        PromptInput.Model = model;
+                        this.UpdateSendButtonState();
+                    }
+                })
+            ], { canBeClosedManually: true });
+            await this.ModelSelectModal.render();
         })
 
         this.UpdateSendButtonState();
@@ -83,20 +101,17 @@ export class PromptInput {
     static async send() {
         const prompt = this.input.value;
         if (!prompt) throw new Error("Prompt cannot be empty");
-        if (this.GetSelectedModel() === undefined) throw new Error("No model selected");
+        if (this.Model === undefined) throw new Error("No model selected");
 
         const message = Message.fromPrompt(prompt);
-        await ConversationManager.SendMessage(message, this.GetSelectedModel());
+        await ConversationManager.SendMessage(message, this.Model);
     }
 
-    static async populateModelSelect(){
+    static async loadModels(){
         const models = await API_ADAPTER.getModels();
-        models.forEach(model => {
-            const option = document.createElement("option");
-            option.value = model.name;
-            option.innerText = model.name;
-            PromptInput.modelSelect.appendChild(option);
-            PromptInput.Models[model.name] = model;
-        });
+        this.Models = models.reduce((acc, model) => {
+            acc[model.name] = model;
+            return acc;
+        }, {})
     }
 }
