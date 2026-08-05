@@ -22,13 +22,22 @@ export class Message {
     //endregion
 
     _id;
+    get id() { return this._id; }
     _role;
+    get role() { return this._role; }
+    set role(value) { this._role = value; }
     _content;
+    get content() { return this._content; }
+    set content(value) {
+        this._content = value;
+        this._contentElement.innerText = value;
+    }
     _conversation;
     set conversation(value) {
         this.parentContainer = value.messageContainer;
         this._conversation = value;
     }
+    get conversation() { return this._conversation; }
 
     _timestamp;
     get timestamp() { return this._timestamp; }
@@ -39,9 +48,6 @@ export class Message {
         this._role = message.role;
         this._content = message.content;
         this._timestamp = message.timestamp;
-
-        if (typeof message.conversation === Conversation)
-        this.conversation = message.conversation;
     }
 
     createDomElement() {
@@ -95,6 +101,14 @@ export class Message {
                 sharedWith: this._conversation.sharedWith,
             },
         }
+    }
+
+    update(message) {
+        this._id = message.id;
+        this.role = message.role;
+        this.content = message.content;
+        this.timestamp = message.timestamp;
+        this.conversation = message.conversation;
     }
 
     static fromPrompt(prompt) {
