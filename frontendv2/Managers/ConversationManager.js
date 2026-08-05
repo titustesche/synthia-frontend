@@ -13,12 +13,6 @@ export class ConversationManager {
     static PromptInputContainer = DomRegister.promptInput.container;
 
     static _conversations = {};
-    static _activeConversation = undefined;
-
-    static SetModel(model) {
-        if (this._activeConversation) this._activeConversation.selectedModel = model;
-    }
-
     static set Conversations(value) {
         SidebarService.setConversations(value);
         this._conversations = value.reduce((acc, conversation) => {
@@ -26,10 +20,14 @@ export class ConversationManager {
             return acc;
         }, {});
     }
-
     static get Conversations() {
         // Return a copy of the conversations array
         return Object.values(this._conversations);
+    }
+    static _activeConversation = undefined;
+
+    static SetModel(model) {
+        if (this._activeConversation) this._activeConversation.selectedModel = model;
     }
 
     static _empty = false;
@@ -69,11 +67,11 @@ export class ConversationManager {
 
             if (conversation.selectedModel) {
                 console.log(`Setting model for ${conversation.name} to ${conversation.selectedModel?.name}`);
-                PromptInput.SetModel(conversation.selectedModel.name);
+                PromptInput.Model  = conversation.selectedModel;
             }
             else {
-                console.log(`No model selected for ${conversation.name}, using ${PromptInput.GetSelectedModel()}`);
-                conversation.selectedModel = PromptInput.GetSelectedModel();
+                console.log(`No model selected for ${conversation.name}, using ${PromptInput.Model}`);
+                conversation.selectedModel = PromptInput.Model;
             }
 
             this.Empty = conversation.messages.length === 0;
@@ -81,6 +79,10 @@ export class ConversationManager {
         }
 
         throw new Error("Conversation does not exist");
+    }
+
+    static GetConversation(conversationId) {
+        return this._conversations[conversationId];
     }
 
     static async CreateConversation(conversation) {
@@ -102,6 +104,20 @@ export class ConversationManager {
         return conversationObject;
     }
 
+    static DeleteConversation(conversationId) {
+        API_ADAPTER.deleteConversation(conversationId)
+            .then(() => {
+                const conversation = this._conversations[conversationId];
+                if (conversation.id === conversationId) this.ClearActiveConversation();
+                delete this._conversations[conversationId];
+                conversation.delete();
+                SidebarService.setConversations(this.Conversations);
+            })
+            .catch(reason => {
+                Popup.error("Deleting failed", reason);
+            })
+    }
+
     static async SendMessage(message, model) {
         if (!this._activeConversation) {
             // Returns an api response
@@ -118,9 +134,9 @@ export class ConversationManager {
 
         message.conversation = this._activeConversation;
 
-        const provider = this._activeConversation.selectedModel?.provider;
+        const provider = model.provider;
 
-        await API_ADAPTER.sendMessage(message.toApiMessage(), model, provider)
+        API_ADAPTER.sendMessage(message.toApiMessage(), model, provider)
             .then(response => {
                 message = new Message(response);
                 this._activeConversation.messages = [...this._activeConversation.messages, message];
@@ -131,5 +147,36 @@ export class ConversationManager {
             .catch(reason => {
                 Popup.error("Could not send message", reason);
             })
+    }
+
+    static async AddMessage(messageDto) {
+        const conversation = this.GetConversation(messageDto.Conversation.Id);
+        if (!conversation) {
+            Popup.error("Could not find conversation", messageDto.Conversation.Id);
+            return;
+        }
+
+        const message = new Message({
+            id: messageDto.Id,
+            content: messageDto.Content,
+            role: messageDto.Role,
+            timestamp: messageDto.Timestamp,
+        });
+        message.conversation = conversation;
+
+        conversation.messages.push(message);
+    }
+
+    static async UpdateMessage(messageDto) {
+        const conversation = this.GetConversation(messageDto.Conversation.Id);
+        if (!conversation) {
+            Popup.error("Could not find conversation", messageDto.Conversation.Id);
+            return;
+        }
+
+        const message = conversation.messages.find(m => m.id === messageDto.Id);
+        if (!message) return this.AddMessage(messageDto);
+
+        message.content = messageDto.Content;
     }
 }
