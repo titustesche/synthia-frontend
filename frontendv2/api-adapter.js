@@ -83,6 +83,18 @@ export class API_ADAPTER {
             })
     }
 
+    static async deleteConversation(conversationId) {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/conversation/${conversationId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(response => {
+                if (!response.ok) throw new Error(response.statusText);
+            })
+    }
+
     static getModels() {
         return fetch(`${API_ADAPTER.API_HTTP_URL}/model/list`, {
             method: "GET",
@@ -126,20 +138,6 @@ export class API_ADAPTER {
             })
     }
 
-    static createLlmProvider(provider) {
-        return fetch(`${API_ADAPTER.API_HTTP_URL}/llm-provider/create`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({provider: provider}),
-        })
-            .then(response => {
-                if (!response.ok) throw new Error(response.statusText);
-                return response.json();
-            })
-    }
-
     static getLlmProviders() {
         return fetch(`${API_ADAPTER.API_HTTP_URL}/llm-provider/list`, {
             method: "GET",
@@ -151,5 +149,15 @@ export class API_ADAPTER {
                 if (!response.ok) throw new Error(response.statusText);
                 return response.json();
             })
+    }
+
+    static addLlmProviders(providers) {
+        return fetch(`${API_ADAPTER.API_HTTP_URL}/llm-provider/add`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({providers}),
+        });
     }
 }
