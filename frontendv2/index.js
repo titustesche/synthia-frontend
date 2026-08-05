@@ -83,10 +83,14 @@ window.onload = async () => {
     }
 
     await LlmProviderManager.loadProviders();
+
     console.log(`Providers count: ${Object.keys(LlmProviderManager.Providers).length}`);
     console.log(LlmProviderManager.Providers);
     if (Object.keys(LlmProviderManager.Providers).length === 0) {
-        await LlmProviderManager.createProvider();
+        await SettingsManager.openSettingsModal({
+            selectedPage: "Provider Settings",
+            canBeClosedManually: false,
+        });
     }
 
     try {
@@ -100,7 +104,7 @@ window.onload = async () => {
         }
 
         await PromptInput.init();
-        await PromptInput.populateModelSelect(SettingsManager.providerUrls);
+        await PromptInput.loadModels(SettingsManager.providers);
     }
 
     catch (e) {
