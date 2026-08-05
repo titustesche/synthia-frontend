@@ -55,6 +55,20 @@
     font-family: var(--text-font), sans-serif;
     display: flex;
     flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+
+    .icon-container {
+        width: 1.5rem;
+        height: 1.5rem;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+    }
+}
+
+.conversation-entry:hover .icon-container {
+    opacity: 1;
 }
 
 .conversation-entry.active {
