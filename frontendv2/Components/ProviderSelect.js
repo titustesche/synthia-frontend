@@ -43,6 +43,7 @@ export class ProviderSelect {
     }
 
     createProviderContainer(provider) {
+        this._selectedProviders.push(provider);
         const container = document.createElement("div");
         container.classList.add("provider-select-provider-container");
 
@@ -51,12 +52,14 @@ export class ProviderSelect {
         nameInput.value = provider.name;
         nameInput.placeholder = "Provider Name";
         nameInput.value = provider.name;
+        nameInput.addEventListener("input", (e) => provider.name = e.target.value)
 
         const urlInput = document.createElement("input");
         urlInput.classList.add("provider-select-provider-url");
         urlInput.value = provider.url;
         urlInput.placeholder = "http://localhost";
         urlInput.value = provider.url;
+        urlInput.addEventListener("input", (e) => provider.url = e.target.value)
 
         const portInput = document.createElement("input");
         portInput.classList.add("provider-select-provider-port");
@@ -64,24 +67,28 @@ export class ProviderSelect {
         portInput.placeholder = "11434";
         portInput.value = provider.port;
         portInput.type = "number";
+        portInput.addEventListener("input", (e) => provider.port = e.target.value)
 
         const tokenInput = document.createElement("input");
         tokenInput.classList.add("provider-select-provider-token");
         tokenInput.value = provider.token;
         tokenInput.placeholder = "Token";
         tokenInput.value = provider.token;
+        tokenInput.addEventListener("input", (e) => provider.token = e.target.value)
 
         const listEndpointInput = document.createElement("input");
         listEndpointInput.classList.add("provider-select-provider-list-endpoint");
         listEndpointInput.value = provider.listEndpoint;
         listEndpointInput.placeholder = "api/tags";
         listEndpointInput.value = provider.listEndpoint;
+        listEndpointInput.addEventListener("input", (e) => provider.listEndpoint = e.target.value)
 
         const chatEndpointInput = document.createElement("input");
         chatEndpointInput.classList.add("provider-select-provider-chat-endpoint");
         chatEndpointInput.value = provider.chatEndpoint;
         chatEndpointInput.placeholder = "api/chat";
         chatEndpointInput.value = provider.chatEndpoint;
+        chatEndpointInput.addEventListener("input", (e) => provider.chatEndpoint = e.target.value)
 
         const removeButton = new Button(container, {
             identifier: "provider-select-provider-remove-button",
@@ -92,6 +99,7 @@ export class ProviderSelect {
                 event?.stopPropagation();
                 container.remove();
                 delete this._providerContainers[provider.name];
+                this._selectedProviders = this._selectedProviders.filter(p => p.name !== provider.name);
             }
         })
 
