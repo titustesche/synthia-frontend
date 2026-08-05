@@ -32,7 +32,7 @@ export class PageLayout {
         }
     }
 
-    constructor(pages) {
+    constructor(pages, options) {
         if (!pages) throw new Error("Pages must be set");
         if (!Array.isArray(pages)) throw new Error("Pages must be an array");
 
@@ -81,6 +81,8 @@ export class PageLayout {
             }
             this._containerElements[page.name] = contentElement;
         }
+
+        if (options?.selectedPage) this.activePage = options.selectedPage;
     }
 
     render() {
