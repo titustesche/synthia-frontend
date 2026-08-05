@@ -3,9 +3,13 @@ import {ConversationManager} from "../Managers/ConversationManager.js";
 import {DomRegister} from "../Static/DomRegister.js";
 import {API_ADAPTER} from "../api-adapter.js";
 import {Message} from "./Message.js";
+import {ContextMenu} from "./ContextMenu.js";
+import {ICONS} from "../Static/Icons.js";
 
 export class Conversation {
     _container;
+
+    _containerText;
 
     _messageContainer;
     get messageContainer() { return this._messageContainer; }
@@ -21,7 +25,10 @@ export class Conversation {
 
     _name;
     get name() { return this._name; }
-    set name(value) { this._name = value; }
+    set name(value) {
+        if (this._containerText) this._containerText.innerText = value;
+        this._name = value;
+    }
 
     // Todo:
     //      - Obviously update the private array
@@ -80,7 +87,44 @@ export class Conversation {
         if (this._container) return this._container;
         this._container = document.createElement("div");
         this._container.classList.add("conversation-entry");
-        this._container.innerText = this.name;
+
+        this._containerText = document.createElement("div");
+        this._containerText.classList.add("conversation-entry-text");
+        this._containerText.innerText = this.name;
+        this._container.appendChild(this._containerText);
+
+        const optionsMenu = document.createElement("div");
+        optionsMenu.classList.add("conversation-entry-options");
+        optionsMenu.classList.add("icon-container");
+        optionsMenu.innerHTML = ICONS.DOTTED_MENU;
+        optionsMenu.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const menu = new ContextMenu(optionsMenu, {
+                sections: [
+                    {
+                        name: "basic",
+                        items: [
+                            {
+                                text: "Delete",
+                                onClick: async () => {
+                                    ConversationManager.DeleteConversation(this.id);
+                                }
+                            },
+                            {
+                                text: "Rename",
+                                onClick: async () => {
+                                    console.log(`Conversation ${this._id} needs to be renamed`);
+                                }
+                            }
+                        ]
+                    }
+                ]
+            });
+
+            menu.position = { x: e.clientX, y: e.clientY };
+            menu.render();
+        })
+        this._container.appendChild(optionsMenu);
 
         this._container.addEventListener("click", () => ConversationManager.SetActiveConversation(this.id));
         return this._container;
@@ -116,5 +160,9 @@ export class Conversation {
     unload() {
         DomRegister.messageContainer.removeChild(this._messageContainer);
         this._container.classList.remove("active");
+    }
+
+    delete() {
+        this._container.remove();
     }
 }
