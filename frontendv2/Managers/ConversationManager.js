@@ -137,13 +137,6 @@ export class ConversationManager {
         const provider = model.provider;
 
         API_ADAPTER.sendMessage(message.toApiMessage(), model, provider)
-            .then(response => {
-                message = new Message(response);
-                this._activeConversation.messages = [...this._activeConversation.messages, message];
-                this._activeConversation.lastInteraction = new Date(message.timestamp);
-                SidebarService.setConversations(this.Conversations);
-                this.Empty = false;
-            })
             .catch(reason => {
                 Popup.error("Could not send message", reason);
             })
