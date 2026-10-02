@@ -6,6 +6,7 @@ import {Message} from "../Components/Message.js";
 import {userService} from "../Services/UserService.js";
 import {API_ADAPTER} from "../api-adapter.js";
 import {PromptInput} from "./PromptInputManager.js";
+import {Translations} from "../Static/i18n.js";
 
 export class ConversationManager {
     static ChatContainer = DomRegister.chatContainer;
@@ -75,13 +76,20 @@ export class ConversationManager {
             }
 
             this.Empty = conversation.messages.length === 0;
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("conversation")) {
+                params.set("conversation", conversationId);
+                window.history.replaceState({}, "", `?${params.toString()}`);
+            } else {
+                window.history.pushState({}, "", `?conversation=${conversationId}`);
+            }
             return;
         }
 
-        throw new Error("Conversation does not exist");
+        throw new Error(Translations.conversation_does_not_exist);
     }
 
-    static GetConversation(conversationId) {
+    static GetConversationFromId(conversationId) {
         return this._conversations[conversationId];
     }
 
@@ -92,7 +100,7 @@ export class ConversationManager {
                 conversationObject = new Conversation(response);
             })
             .catch(reason => {
-                Popup.error("Could not create conversation", reason);
+                Popup.error(Translations.could_not_create_conversation, reason);
                 conversationObject = undefined;
             });
 
@@ -114,7 +122,7 @@ export class ConversationManager {
                 SidebarService.setConversations(this.Conversations);
             })
             .catch(reason => {
-                Popup.error("Deleting failed", reason);
+                Popup.error(Translations.deleting_failed, reason);
             })
     }
 
@@ -122,11 +130,11 @@ export class ConversationManager {
         if (!this._activeConversation) {
             // Returns an api response
             const conversation = await this.CreateConversation({
-                name: "Generated Conversation",
+                name: Translations.generated_conversation,
                 owner: userService.user,
             });
 
-            if (!conversation) return Popup.debug("Debug", "Conversation Object was undefined");
+            if (!conversation) return Popup.debug(Translations.debug, Translations.conversation_undefined);
 
             await this.SetActiveConversation(conversation.id);
             this.Empty = false;
@@ -138,38 +146,41 @@ export class ConversationManager {
 
         API_ADAPTER.sendMessage(message.toApiMessage(), model, provider)
             .catch(reason => {
-                Popup.error("Could not send message", reason);
+                Popup.error(Translations.could_not_send_message, reason);
             })
     }
 
     static async AddMessage(messageDto) {
-        const conversation = this.GetConversation(messageDto.Conversation.Id);
+        console.log("Need to create message")
+        const conversation = this.GetConversationFromId(messageDto.Conversation.Id);
         if (!conversation) {
-            Popup.error("Could not find conversation", messageDto.Conversation.Id);
+            Popup.error(Translations.could_not_find_conversation, messageDto.Conversation.Id);
             return;
         }
 
         const message = new Message({
             id: messageDto.Id,
             content: messageDto.Content,
+            thoughts: messageDto.Thoughts,
             role: messageDto.Role,
             timestamp: messageDto.Timestamp,
         });
-        message.conversation = conversation;
 
+        message.conversation = conversation;
         conversation.messages.push(message);
     }
 
     static async UpdateMessage(messageDto) {
-        const conversation = this.GetConversation(messageDto.Conversation.Id);
+        const conversation = this.GetConversationFromId(messageDto.Conversation.Id);
         if (!conversation) {
-            Popup.error("Could not find conversation", messageDto.Conversation.Id);
+            Popup.error(Translations.could_not_find_conversation, messageDto.Conversation.Id);
             return;
         }
 
         const message = conversation.messages.find(m => m.id === messageDto.Id);
         if (!message) return this.AddMessage(messageDto);
 
-        message.content = messageDto.Content;
+        messageDto.Conversation = conversation;
+        message.update(messageDto);
     }
 }
