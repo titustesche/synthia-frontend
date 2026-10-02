@@ -158,6 +158,9 @@ export class API_ADAPTER {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({providers}),
-        });
+        })
+            .then(response => {
+                if (!response.ok) throw new Error(response.statusText);
+            });
     }
 }

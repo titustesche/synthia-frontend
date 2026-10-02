@@ -104,7 +104,7 @@ export class ConversationManager {
                 conversationObject = undefined;
             });
 
-        if (!conversationObject) console.log("Conversation object was undefined");
+        if (!conversationObject) return undefined;
 
         this._conversations[conversationObject.id] = conversationObject;
         console.log(this.Conversations);
@@ -116,7 +116,7 @@ export class ConversationManager {
         API_ADAPTER.deleteConversation(conversationId)
             .then(() => {
                 const conversation = this._conversations[conversationId];
-                if (conversation.id === conversationId) this.ClearActiveConversation();
+                if (this._activeConversation?.id === conversationId) this.ClearActiveConversation();
                 delete this._conversations[conversationId];
                 conversation.delete();
                 SidebarService.setConversations(this.Conversations);
@@ -134,7 +134,7 @@ export class ConversationManager {
                 owner: userService.user,
             });
 
-            if (!conversation) return Popup.debug(Translations.debug, Translations.conversation_undefined);
+            if (!conversation) throw new Error(Translations.could_not_create_conversation);
 
             await this.SetActiveConversation(conversation.id);
             this.Empty = false;
@@ -144,10 +144,7 @@ export class ConversationManager {
 
         const provider = model.provider;
 
-        API_ADAPTER.sendMessage(message.toApiMessage(), model, provider)
-            .catch(reason => {
-                Popup.error(Translations.could_not_send_message, reason);
-            })
+        await API_ADAPTER.sendMessage(message.toApiMessage(), model, provider);
     }
 
     static async AddMessage(messageDto) {
@@ -166,8 +163,7 @@ export class ConversationManager {
             timestamp: messageDto.Timestamp,
         });
 
-        message.conversation = conversation;
-        conversation.messages.push(message);
+        conversation.addMessage(message);
     }
 
     static async UpdateMessage(messageDto) {

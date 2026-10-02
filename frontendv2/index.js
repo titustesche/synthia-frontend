@@ -25,7 +25,7 @@ window.onload = async () => {
     try {
 
         if (!httpOk) throw new Error("HTTP connection failed");
-        WebSocketManager.connectOrFail();
+        await WebSocketManager.connectOrFail();
         wsOk = true;
     }
     catch (e) {
@@ -71,6 +71,7 @@ window.onload = async () => {
 
                     if (!email || !password) {
                         Popup.error(Translations.invalid_credentials, Translations.invalid_credentials_message);
+                        return;
                     }
 
                     await UserService.login(emailInput.value, passwordInput.value);

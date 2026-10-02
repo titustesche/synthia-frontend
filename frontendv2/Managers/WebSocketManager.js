@@ -31,24 +31,36 @@ export class WebSocketManager {
         }
     }
 
+    // Resolves once the socket is open, rejects if it closes before that.
+    // Reuses an already open socket instead of opening a second one.
     static connectOrFail() {
-        this._socket = new WebSocket(API_ADAPTER.WS_URL);
+        if (this._socket?.readyState === WebSocket.OPEN) return Promise.resolve();
+        if (this._socket) this._socket.close();
 
-        this._socket.onopen = () => {
-            this._isConnected = true;
-            this._lastPing = Date.now();
-            this._pingInterval = setInterval(this.sendPing, 10000);
-        };
+        const socket = new WebSocket(API_ADAPTER.WS_URL);
+        this._socket = socket;
 
-        this._socket.onclose = () => {
-            this._isConnected = false;
-            if (this._pingInterval) {
-                clearInterval(this._pingInterval);
-                this._pingInterval = null;
-            }
-        };
+        const opened = new Promise((resolve, reject) => {
+            socket.onopen = () => {
+                this._isConnected = true;
+                this._lastPing = Date.now();
+                this._pingInterval = setInterval(this.sendPing, 10000);
+                resolve();
+            };
 
-        this._socket.onmessage = async (event) => {
+            socket.onclose = () => {
+                reject(new Error("WebSocket connection closed"));
+                // A replaced socket must not tear down the state of its successor
+                if (socket !== this._socket) return;
+                this._isConnected = false;
+                if (this._pingInterval) {
+                    clearInterval(this._pingInterval);
+                    this._pingInterval = null;
+                }
+            };
+        });
+
+        socket.onmessage = async (event) => {
             const data = JSON.parse(event.data);
 
             switch (data.type) {
@@ -74,6 +86,8 @@ export class WebSocketManager {
                     break;
             }
         };
+
+        return opened;
     }
 
     static send(type, body) {

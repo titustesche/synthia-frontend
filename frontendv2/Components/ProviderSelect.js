@@ -10,8 +10,6 @@ export class ProviderSelect {
     _listContainer;
     _addButton;
 
-    _providerContainers = [];
-
     _selectedProviders = [];
     get selectedProviders() { return this._selectedProviders; }
 
@@ -39,7 +37,8 @@ export class ProviderSelect {
         this._container.appendChild(this._addButton);
 
         for (let provider of Object.keys(details.initialValue).map(key => details.initialValue[key])) {
-            this.createProviderContainer(provider);
+            // Work on copies so cancelling the settings modal discards the edits
+            this.createProviderContainer({...provider});
         }
     }
 
@@ -99,8 +98,7 @@ export class ProviderSelect {
             onClick: (event) => {
                 event?.stopPropagation();
                 container.remove();
-                delete this._providerContainers[provider.name];
-                this._selectedProviders = this._selectedProviders.filter(p => p.name !== provider.name);
+                this._selectedProviders = this._selectedProviders.filter(p => p !== provider);
             }
         })
 
@@ -114,7 +112,6 @@ export class ProviderSelect {
         removeButton.render();
 
         this._listContainer.appendChild(container);
-        this._providerContainers[provider.name] = container;
         return container;
     }
 
