@@ -1,5 +1,6 @@
 import {API_ADAPTER} from "../api-adapter.js";
 import {Popup} from "../Components/Popup.js";
+import {Translations} from "../Static/i18n.js";
 
 export const userService = {
     isLoggedIn: false,
@@ -13,7 +14,7 @@ export const userService = {
                 && loggedInUser.hasOwnProperty('username')
                 && loggedInUser.hasOwnProperty('email')
             ) {
-                const isValid = await API_ADAPTER.verifyUser(loggedInUser.email, loggedInUser.password);
+                const isValid = await API_ADAPTER.verifyUser(loggedInUser.email, loggedInUser.token ?? "abcd-1234-efgh");
                 if (isValid) {
                     userService.user = loggedInUser;
                     userService.isLoggedIn = true;
@@ -38,12 +39,23 @@ export const userService = {
             }
 
             else {
-                throw new Error("Server response malformed");
+                throw new Error(Translations.server_response_malformed);
             }
         }
         catch (e) {
             // logger.debug(e);
-            Popup.debug("Error while logging in", e);
+            Popup.debug(Translations.login_error, e);
         }
-    }
+    },
+
+    requestSessionToken: async (email, password) => {
+
+    },
+    refreshSessionToken: async () => {
+
+    },
+    logout: async () => {
+        localStorage.removeItem("user");
+        userService.isLoggedIn = false;
+    },
 }
