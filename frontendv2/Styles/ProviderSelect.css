@@ -28,3 +28,26 @@
 #provider-select-provider-remove-button {
     grid-area: remove;
 }
+
+.provider-select-add-button {
+    margin: 1rem;
+    height: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+    border: none;
+    padding: 1rem;
+    background-color: var(--indicator-green-background);
+    border-radius: var(--border-radius);
+    background-image: url("../Static/Assets/DottedOutline.svg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+    transition: all var(--short-animation-duration) ease;
+}
+
+.provider-select-add-button:hover {
+    filter: brightness(1.2) saturate(1.2);
+    cursor: pointer;
+    transform: scale(1.01);
+    transition: transform var(--short-animation-duration) ease;
+}
