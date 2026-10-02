@@ -7,6 +7,7 @@ export class ContextMenu {
     set position(value) { this._position = value; }
 
     _sections = {};
+    _onDocumentClick;
 
     constructor(parentContainer, details) {
         if (!details.hasOwnProperty("sections")) throw new Error("ContextMenu needs to have sections");
@@ -71,10 +72,27 @@ export class ContextMenu {
         if (!this._parentContainer) throw new Error("Parent container needs to be set before rendering");
         this._container.style.left = `${this._position.x}px`;
         this._container.style.top = `${this._position.y}px`;
+
+        this._onDocumentClick = (e) => {
+            if (e.composedPath().includes(this._container)) return;
+            this.destroy();
+        };
+
+        setTimeout(() => {
+            if (!this._onDocumentClick) return;
+            document.addEventListener("click", this._onDocumentClick, true);
+            document.addEventListener("contextmenu", this._onDocumentClick, true);
+        }, 0);
+
         this._parentContainer.appendChild(this._container);
     }
 
     destroy() {
+        if (this._onDocumentClick) {
+            document.removeEventListener("click", this._onDocumentClick, true);
+            document.removeEventListener("contextmenu", this._onDocumentClick, true);
+            this._onDocumentClick = null;
+        }
         this._container.remove();
     }
 }
