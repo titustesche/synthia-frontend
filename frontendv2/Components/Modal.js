@@ -7,6 +7,7 @@ export class Modal {
         reject: undefined,
         resolve: undefined
     };
+    _closeListener;
 
     _title;
     set title(value) {
@@ -46,9 +47,10 @@ export class Modal {
         this._background.appendChild(this._container);
 
         if (this._canBeClosedManually) {
-            document.addEventListener("click", (event) => {
+            this._closeListener = (event) => {
                 if (!this._container.contains(event.target)) this.destroy();
-            })
+            }
+             document.addEventListener("click", (event) => this._closeListener(event));
         }
         return new Promise((resolve, reject) => {
             this._onDestroyPromise.resolve = resolve;
@@ -58,6 +60,7 @@ export class Modal {
 
     destroy() {
         this._onDestroyPromise.resolve();
+        document.removeEventListener("click", this._closeListener);
         this._background.remove();
     }
 }
