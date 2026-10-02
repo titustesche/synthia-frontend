@@ -44,7 +44,7 @@ async function Request(prompt)
     activeMessage.outlineShape = 'transparent, #00d0ff';
 
     let body = {
-        url: "http://localhost:11434/api/chat",
+        url: `${window.config.api.ollamaUrl}/api/chat`,
         model: "gpt-oss",
         role: "user",
         query: prompt,
@@ -60,7 +60,7 @@ async function Request(prompt)
         credentials: "include"
     }
 
-    fetch(`http://localhost:3000/chat/${activeConversation.id}`, options)
+    fetch(`${window.config.api.backendUrl}/chat/${activeConversation.id}`, options)
         .then(response => response.body)
         .then(rb => {
             const reader = rb.getReader();
@@ -124,41 +124,35 @@ async function Request(prompt)
 // Get all the conversations from the database and return them as and array
 async function generateConversations() {
     let res = [];
-    let url = `http://localhost:3000/conversation`;
+    let url = `${window.config.api.backendUrl}/conversation`;
     let requestOptions = {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
         },
         credentials: "include",
+    };
+
+    let response = await fetch(url, requestOptions);
+    if (response.status === 401) {
+        throw new Error("Unauthorized");
     }
 
-    try {
-        let response = await fetch(url, requestOptions);
-        if (response.status === 401) {
-            throw new Error("Unauthorized");
-        }
-
-        if (!response.ok) {
-            throw new Error("HTTP Error. Status: " + response.status);
-        }
-
-        const result = await response.json();
-        result.conversations.forEach(conversation => {
-            res.push(new Conversation(conversation.id, conversation.name));
-        });
-        return res;
+    if (!response.ok) {
+        throw new Error("HTTP Error. Status: " + response.status);
     }
 
-    catch (e) {
-        throw e;
-    }
+    const result = await response.json();
+    result.conversations.forEach(conversation => {
+        res.push(new Conversation(conversation.id, conversation.name));
+    });
+    return res;
 }
 
 // Requests all messages of a conversation from the backend
 async function getMessages(id) {
     let res = [];
-    let url = `http://localhost:3000/message/${id}`;
+    let url = `${window.config.api.backendUrl}/message/${id}`;
     let requestOptions = {
         method: "GET",
         headers: {

@@ -1,0 +1,36 @@
+.message-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: var(--background-color);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+
+    width: fit-content;
+    min-width: 100px;
+    max-width: 80%;
+}
+
+.message-container.message-role-0 {
+    align-self: flex-end;
+}
+
+.message-timestamp {
+    font-size: 0.75rem;
+    color: var(--text-color-muted);
+}
+
+.message-thought {
+    font-size: 1rem;
+    color: transparent;
+    cursor: pointer;
+    background-clip: text;
+    background-image: linear-gradient(to right, var(--accent-color), var(--text-color-muted), var(--accent-color));
+    background-size: 200% 200%;
+    animation: thoughtTextAnimation 3s linear infinite;
+}
+
+@keyframes thoughtTextAnimation {
+    0%{background-position:200% 0}
+    100%{background-position:0 0}
+}

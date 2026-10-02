@@ -38,15 +38,34 @@ const codes = Object.freeze({
     ERROR: 1, // Program exit code
     WRITING: "Writing", // Instructions for displaying
     RUNNING: "Running", // Instructions for displaying
-    INPUT_REQUIRED: "Waiting for Input", // Not in use
+    INPUT_REQUIRED: "Waiting for user Input", // Not in use
 })
 
 // Shit that needs to be done when the site is first loaded
-window.onload = async function() {
+async function initSite() {
     // Assign important Elements
     chatbox = document.getElementById('chatbox');
     conversationContainer = document.getElementsByClassName('sidebar-container')[0];
     cssRoot = document.documentElement;
+
+    const modelSelect = document.getElementById("model-select");
+    let response = await fetch(`${window.config.api.backendUrl}/model/list`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({providerUrls: ["http://localhost:11434/api/tags"]}),
+    });
+
+    if (response.ok) {
+        for (let model of await response.json()) {
+            modelSelect.options.add(new Option(model.name));
+        }
+    }
+
+    modelSelect.addEventListener("change", async () => {
+        window.config.api.model = modelSelect.options[modelSelect.selectedIndex].text;
+    })
 
     document.getElementById("conversation-wrapper").addEventListener("scroll", () => {
         updateOpacity();
@@ -62,7 +81,6 @@ window.onload = async function() {
         });
 
         // Set the active Conversation, default is first in array
-        // IMPORTANT do not remove that plus sign for gods sake
         activeConversation = conversations.find(conversation => conversation.id === new URL(window.location.href).searchParams.get("conversation"));
         activeConversation.object.setAttribute("active", "true");
 
@@ -72,10 +90,11 @@ window.onload = async function() {
     }
 
     catch (e) {
+        console.log(e);
         if (e.message === "Unauthorized") {
-            window.location.href = `account/?action=login&cause=Unauthorized&redirect=${window.location.href}`;
+            // Redirect to the login page and keep a reference to the page the user came from
+            window.location.href = `account/?page=login&cause=Unauthorized&redirect=${window.location.href}`;
         }
-        console.log(e.message);
         return;
     }
 
@@ -104,10 +123,7 @@ window.onload = async function() {
         console.log(this.scrollHeight);
     });
 
-    // The styling part
-    // Todo:
-    //      Apply this effect to messages when the ai is typing to indicate activity
-    //      Maybe another color when generating python scripts?
+    //region Styling
 
     // Unused as of now.
     // Was intended to change the message opacity when they get out of sight
@@ -116,34 +132,7 @@ window.onload = async function() {
     chatbox.addEventListener('scroll', async function() {
         await messageOpacity(this, document.querySelectorAll('.msg_user'));
     })
+
+    //endregion
     */
-
-    // Way too resource intensive for making text look a fancy, but I like it
-    // Also it's fully customizable for every text Element
-    document.getElementsByTagName('body')[0].addEventListener('mousemove', function (e) {
-        // Read the default text color to use it as "Background"
-        let textColor = getComputedStyle(cssRoot).getPropertyValue('--primary-text-color');
-        
-        // Apply Effect to messages and Conversations
-        messageElements.forEach(messageElement => {
-            if (messageElement.role === "assistant") {
-                drawMouseHighlight(messageElement.body, e.pageX, e.pageY, "rgb(136,255,255)", "white", 150);
-                // Optional Mouse highlight for Assistant header, looks better without it
-                // drawMouseHighlight(messageElement.header, e.pageX, e.pageY, '#25d80a', "#0a5fd8", 150);
-            }
-
-            else {
-                drawMouseHighlight(messageElement.body, e.pageX, e.pageY, "rgb(150,202,107)", "white", 150);
-                // Optional Mouse highlight for User header, looks better without it
-                // drawMouseHighlight(messageElement.header, e.pageX, e.pageY, '#0a5fd8', "#25d80a", 100);
-            }
-        });
-        conversations.forEach(conversation => {
-            drawMouseHighlight(conversation.object, e.pageX, e.pageY, "rgba(110,20,205,0.5)", textColor, 60);
-        });
-        
-        // Can be uncommented to apply to other elements as well, but I like it subtle
-        // drawMouseHighlight(document.getElementById('glassWrapper'), e.pageX, e.pageY, "rgba(0,255,221,0.63)");
-        // drawMouseHighlight(document.getElementById('sidebar-wrapper'), e.pageX, e.pageY, "rgba(0,101,255,0.63)");
-    });
 }

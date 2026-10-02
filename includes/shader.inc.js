@@ -1,5 +1,5 @@
 // This is very poorly hacked together with AI
-// But as it currently works, rewriting has low priority
+// But due to it currently working, rewriting has low priority
 
 let shaderTime = 0.0;
 let timeCheck = 0.0;
