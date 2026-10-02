@@ -52,6 +52,15 @@ export class Conversation {
         this._updateHeight();
     }
 
+    addMessage(message) {
+        this._messages.push(message);
+        message.conversation = this;
+        if (ConversationManager._activeConversation?.id === this.id) {
+            ConversationManager.Empty = false;
+        }
+        this._updateHeight();
+    }
+
     _owner;
     get owner() { return this._owner; }
     set owner(value) { this._owner = value; }

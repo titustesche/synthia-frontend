@@ -42,9 +42,12 @@ export class SettingsManager {
     }
 
     static setProviders(providers) {
-        const newProviders = providers.filter(provider => !SettingsManager.providers.includes(provider));
+        // Providers loaded from the backend carry an id, rows added in the settings modal don't
+        const newProviders = providers.filter(provider => !provider.id);
         SettingsManager.providers = providers;
+        if (newProviders.length === 0) return;
         API_ADAPTER.addLlmProviders(newProviders)
+            .then(() => LlmProviderManager.loadProviders())
             .then(() => {
                 Popup.debug(Translations.success, Translations.providers_added);
             })
@@ -57,8 +60,8 @@ export class SettingsManager {
     static loadSettings() {
         const language = localStorage.getItem("language") ?? "en";
         const accentColor = localStorage.getItem("accent-color") ?? "";
-        const providers = JSON.parse(localStorage.getItem("provider-urls") ?? {});
-        const debugMode = localStorage.getItem("debug-mode") ?? false;
+        const providers = JSON.parse(localStorage.getItem("provider-urls") ?? "[]");
+        const debugMode = localStorage.getItem("debug-mode") === "true";
 
         SettingsManager.language = language;
         setTranslations(language);
@@ -103,7 +106,7 @@ export class SettingsManager {
                 else Popup.error(Translations.unreachable, Translations.backend_unreachable);
 
                 try {
-                    WebSocketManager.connectOrFail();
+                    await WebSocketManager.connectOrFail();
                     Popup.debug(Translations.connected, Translations.websocket_reachable);
                 } catch (e) {
                     Popup.error(Translations.unreachable, Translations.websocket_unreachable);

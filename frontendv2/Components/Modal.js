@@ -50,7 +50,7 @@ export class Modal {
             this._closeListener = (event) => {
                 if (!this._container.contains(event.target)) this.destroy();
             }
-             document.addEventListener("click", (event) => this._closeListener(event));
+            document.addEventListener("click", this._closeListener);
         }
         return new Promise((resolve, reject) => {
             this._onDestroyPromise.resolve = resolve;
@@ -59,8 +59,11 @@ export class Modal {
     }
 
     destroy() {
-        this._onDestroyPromise.resolve();
-        document.removeEventListener("click", this._closeListener);
+        this._onDestroyPromise.resolve?.();
+        if (this._closeListener) {
+            document.removeEventListener("click", this._closeListener);
+            this._closeListener = undefined;
+        }
         this._background.remove();
     }
 }
