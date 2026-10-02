@@ -19,7 +19,7 @@ export class API_ADAPTER {
             .catch(() => false)
     }
 
-    static verifyUser(email) {
+    static verifyUser(email, token) {
         return fetch(`${API_ADAPTER.API_HTTP_URL}/user/verify`, {
             method: "POST",
             headers: {
@@ -27,7 +27,7 @@ export class API_ADAPTER {
             },
             body: JSON.stringify({
                 email: email,
-                token: "abcdef-1234-ghijk-5678"
+                token: token
             }),
         }).then(response => {
             return response.ok;
@@ -77,6 +77,7 @@ export class API_ADAPTER {
             .then(response => {
                 if (!response.ok) {
                     if (response.status === 404) return [];
+                    if (response.status === 401) // Todo: call standard unauthorized routine;
                     throw new Error(response.statusText);
                 }
                 return response.json();
