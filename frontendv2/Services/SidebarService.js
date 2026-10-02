@@ -61,6 +61,7 @@ export const SidebarService = {
 
         const anyConversations = conversations.length > 0;
         SidebarService.conversationContainer.classList.toggle("empty", !anyConversations);
+        SidebarService.conversations = conversations;
 
         if (!anyConversations) return SidebarService.conversationContainer.innerHTML = `<p class='sidebar-info-text'>${Translations.no_conversations_found}</p>`;
 
@@ -68,7 +69,6 @@ export const SidebarService = {
 
         conversations.forEach(conversation => {
             SidebarService.conversationContainer.appendChild(conversation.createSidebarEntry());
-            SidebarService.conversations.push(conversation);
         });
     }
 };

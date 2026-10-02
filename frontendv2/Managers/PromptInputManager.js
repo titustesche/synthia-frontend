@@ -105,7 +105,18 @@ export class PromptInput {
         if (this.Model === undefined) throw new Error(Translations.no_model_selected_error);
 
         const message = Message.fromPrompt(prompt);
-        await ConversationManager.SendMessage(message, this.Model);
+        this.input.value = "";
+        this.UpdateInputHeight();
+        this.UpdateSendButtonState();
+        try {
+            await ConversationManager.SendMessage(message, this.Model);
+        } catch (e) {
+            // Give the prompt back so it does not get lost
+            this.input.value = prompt;
+            this.UpdateInputHeight();
+            this.UpdateSendButtonState();
+            throw e;
+        }
     }
 
     static async loadModels(){
