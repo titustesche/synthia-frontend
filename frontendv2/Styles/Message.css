@@ -19,3 +19,18 @@
     font-size: 0.75rem;
     color: var(--text-color-muted);
 }
+
+.message-thought {
+    font-size: 1rem;
+    color: transparent;
+    cursor: pointer;
+    background-clip: text;
+    background-image: linear-gradient(to right, var(--accent-color), var(--text-color-muted), var(--accent-color));
+    background-size: 200% 200%;
+    animation: thoughtTextAnimation 3s linear infinite;
+}
+
+@keyframes thoughtTextAnimation {
+    0%{background-position:200% 0}
+    100%{background-position:0 0}
+}
