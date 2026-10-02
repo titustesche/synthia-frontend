@@ -1,4 +1,5 @@
 import {ICONS} from "../Static/Icons.js";
+import {Translations} from "../Static/i18n.js";
 
 export class TextInput {
     _parentContainer;
@@ -31,7 +32,7 @@ export class TextInput {
     get visibleValue() { return this._visibleValue; }
     set visibleValue(value) {
         if (!value) {
-            this._censoringOverlay.innerText = this._placeholder ?? "Placeholder";
+            this._censoringOverlay.innerText = this._placeholder ?? Translations.placeholder;
             this._censoringOverlay.classList.add("placeholder");
             return;
         } else {

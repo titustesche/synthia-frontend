@@ -4,6 +4,7 @@ import {Button} from "../Components/Button.js";
 import {ICONS} from "../Static/Icons.js";
 import {SettingsManager} from "../Managers/SettingsManager.js";
 import {ConversationManager} from "../Managers/ConversationManager.js";
+import {Translations} from "../Static/i18n.js";
 
 export const SidebarService = {
     controlsContainer: undefined,
@@ -18,13 +19,13 @@ export const SidebarService = {
         const createConversationButton = new Button(SidebarService.controlsContainer, {
             icon: ICONS.CREATE,
             identifier: "create-conversation-button",
-            text: "New Conversation",
+            text: Translations.new_conversation,
             className: "prominent-button",
             onClick: async () => {
                 await new Promise(resolve => setTimeout(resolve, 1));
                 const name = new TextInput(undefined, {
                     identifier: "conversation-name",
-                    placeholder: "Conversation Name",
+                    placeholder: Translations.conversation_name_placeholder,
                     censorInput: false
                 });
 
@@ -36,7 +37,7 @@ export const SidebarService = {
             icon: ICONS.SETTINGS,
             identifier: "settings-button",
             className: "prominent-button secondary",
-            text: "Settings",
+            text: Translations.settings,
             onClick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -61,7 +62,7 @@ export const SidebarService = {
         const anyConversations = conversations.length > 0;
         SidebarService.conversationContainer.classList.toggle("empty", !anyConversations);
 
-        if (!anyConversations) return SidebarService.conversationContainer.innerHTML = "<p class='sidebar-info-text'>No conversations found</p>";
+        if (!anyConversations) return SidebarService.conversationContainer.innerHTML = `<p class='sidebar-info-text'>${Translations.no_conversations_found}</p>`;
 
         conversations.sort((a, b) => b.lastInteraction - a.lastInteraction);
 

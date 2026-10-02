@@ -6,6 +6,7 @@ import {Message} from "../Components/Message.js";
 import {Modal} from "../Components/Modal.js";
 import {ModelSelect} from "../Components/ModelSelect.js";
 import {TextInput} from "../Components/TextInput.js";
+import {Translations} from "../Static/i18n.js";
 
 export class PromptInput {
     static container = DomRegister.promptInput.container;
@@ -55,7 +56,7 @@ export class PromptInput {
             try {
                 await this.send();
             } catch (e) {
-                Popup.error("Could not send message", e);
+                Popup.error(Translations.could_not_send_message, e);
             }
         });
 
@@ -69,7 +70,7 @@ export class PromptInput {
                 try {
                     await this.send();
                 } catch (e) {
-                    Popup.error("Could not send message", e);
+                    Popup.error(Translations.could_not_send_message, e);
                     this.container.classList.add("shake");
                     setTimeout(() => this.container.classList.remove("shake"), 200);
                 }
@@ -79,10 +80,10 @@ export class PromptInput {
         this.modelSelect.addEventListener("click", async (e) => {
             e.stopPropagation();
             if (this.ModelSelectModal) this.ModelSelectModal.destroy();
-            this.ModelSelectModal = new Modal("Select Model", [
+            this.ModelSelectModal = new Modal(Translations.select_model, [
                 new ModelSelect(undefined, {
                     identifier: "model-select",
-                    placeholder: "Model",
+                    placeholder: Translations.model_placeholder,
                     models: PromptInput.Models,
                     selectedModel: PromptInput.Model ?? undefined,
                     onModelChange: (model) => {
@@ -100,8 +101,8 @@ export class PromptInput {
 
     static async send() {
         const prompt = this.input.value;
-        if (!prompt) throw new Error("Prompt cannot be empty");
-        if (this.Model === undefined) throw new Error("No model selected");
+        if (!prompt) throw new Error(Translations.prompt_empty_error);
+        if (this.Model === undefined) throw new Error(Translations.no_model_selected_error);
 
         const message = Message.fromPrompt(prompt);
         await ConversationManager.SendMessage(message, this.Model);

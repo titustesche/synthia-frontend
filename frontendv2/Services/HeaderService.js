@@ -1,11 +1,12 @@
 import {DomRegister} from "../Static/DomRegister.js";
 import {Popup} from "../Components/Popup.js";
 import {SettingsManager} from "../Managers/SettingsManager.js";
+import {Translations} from "../Static/i18n.js";
 
 export const HeaderService = {
     setupHeader: () => {
         if (!DomRegister.accentColorPicker)
-            Popup.debug("Light error", "Could not determine accent color picker");
+            Popup.debug(Translations.light_error, Translations.accent_color_missing);
         else {
             DomRegister.accentColorPicker.addEventListener("input", () => {
                 const hexToHSV = (hex) => {

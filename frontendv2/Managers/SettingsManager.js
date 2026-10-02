@@ -11,11 +11,23 @@ import {userService} from "../Services/UserService.js";
 import {ICONS} from "../Static/Icons.js";
 import {Modal} from "../Components/Modal.js";
 import {PageLayout} from "../Components/PageLayout.js";
+import {Languages, setTranslations, Translations} from "../Static/i18n.js";
 
 export class SettingsManager {
     static accentColor = undefined;
     static _debugMode;
     static providers = [];
+    static _language = "en";
+    static get language() { return SettingsManager._language; }
+    static set language(value) {
+        if (!Languages.includes(value)) {
+            Popup.error(Translations.invalid_language, Translations.language_not_supported);
+            value = "en";
+        }
+        SettingsManager._language = value;
+        localStorage.setItem("language", value);
+        setTranslations(value);
+    }
 
     static get debugMode() { return SettingsManager._debugMode; }
     static set debugMode(value) {
@@ -34,21 +46,24 @@ export class SettingsManager {
         SettingsManager.providers = providers;
         API_ADAPTER.addLlmProviders(newProviders)
             .then(() => {
-                Popup.debug("Success", "New providers have been added to database");
+                Popup.debug(Translations.success, Translations.providers_added);
             })
             .catch(reason => {
-                Popup.error("Could not add providers", reason);
+                Popup.error(Translations.could_not_add_providers, reason);
             })
         localStorage.setItem("provider-urls", JSON.stringify(providers));
     }
 
     static loadSettings() {
-        const accentColor = localStorage.getItem("accent-color");
-        const providerUrls = localStorage.getItem("provider-urls");
+        const language = localStorage.getItem("language") ?? "en";
+        const accentColor = localStorage.getItem("accent-color") ?? "";
+        const providers = JSON.parse(localStorage.getItem("provider-urls") ?? {});
         const debugMode = localStorage.getItem("debug-mode") ?? false;
 
-        if (accentColor) SettingsManager.accentColor = accentColor;
-        if (providerUrls) SettingsManager.providers = JSON.parse(providerUrls);
+        SettingsManager.language = language;
+        setTranslations(language);
+        SettingsManager.accentColor = accentColor;
+        SettingsManager.providers = providers;
         SettingsManager._debugMode = debugMode;
 
         SettingsManager.applySettings();
@@ -63,42 +78,42 @@ export class SettingsManager {
 
         const usernameInput = new TextInput(undefined, {
             identifier: "username",
-            placeholder: "Username",
+            placeholder: Translations.username,
             initialValue: userService.user.username,
-            label: "Username",
+            label: Translations.username,
         })
 
         const providerInput = new ProviderSelect(undefined, {
             identifier: "provider-select",
-            placeholder: "Provider",
+            placeholder: Translations.provider_placeholder,
             initialValue: LlmProviderManager.Providers,
         });
 
         const pingDisplay = new BodyText(undefined, {
             // TODO: live updates would be nice
-            text: `Last Ping: ${WebSocketManager.ping}ms`,
+            text: `${Translations.last_ping}: ${WebSocketManager.ping}ms`,
         });
 
         const clearCacheButton = new Button(undefined, {
             identifier: "test-http-connection-button",
-            text: "Check Backend Availability",
+            text: Translations.check_backend_availability,
             onClick: async () => {
                 const httpOk = await API_ADAPTER.ensureBackendConnection();
-                if (httpOk) Popup.debug("Connected", "Backend is reachable");
-                else Popup.error("Unreachable", "Backend is unreachable");
+                if (httpOk) Popup.debug(Translations.connected, Translations.backend_reachable);
+                else Popup.error(Translations.unreachable, Translations.backend_unreachable);
 
                 try {
                     WebSocketManager.connectOrFail();
-                    Popup.debug("Connected", "WebSocket is reachable");
+                    Popup.debug(Translations.connected, Translations.websocket_reachable);
                 } catch (e) {
-                    Popup.error("Unreachable", "WebSocket is unreachable");
+                    Popup.error(Translations.unreachable, Translations.websocket_unreachable);
                 }
             }
         });
 
         const requestNotificationButton = new Button(undefined, {
             identifier: "request-notification-button",
-            text: "Request Notification",
+            text: Translations.request_notification,
             onClick: async () => {
                 WebSocketManager.send("notification", undefined);
             }
@@ -107,25 +122,25 @@ export class SettingsManager {
         const layout = new PageLayout([
             {
                 icon: ICONS.SETTINGS,
-                name: "General Settings",
-                title: "General",
+                name: Translations.general_settings,
+                title: Translations.general,
                 components: [usernameInput]
             },
             {
                 icon: ICONS.SERVER,
-                name: "Provider Settings",
-                title: "Providers",
+                name: Translations.provider_settings,
+                title: Translations.providers,
                 components: [providerInput]
             },
             {
                 icon: ICONS.DEVELOPER_SETTINGS,
-                name: "Developer Settings",
-                title: "Developer",
+                name: Translations.developer_settings,
+                title: Translations.developer,
                 components: [pingDisplay, clearCacheButton, requestNotificationButton]
             }
         ], options);
 
-        const settingsModal = new Modal("Settings", [
+        const settingsModal = new Modal(Translations.settings, [
                 layout,
                 new GridLayout(undefined, {
                     identifier: "settings-buttons-grid",
@@ -135,7 +150,7 @@ export class SettingsManager {
                         new Button(undefined, {
                             identifier: "settings-modal-submit",
                             className: "prominent-button tertiary centered",
-                            text: "Save settings",
+                            text: Translations.save_settings,
                             onClick: () => {
                                 const providers = providerInput.selectedProviders;
                                 SettingsManager.setProviders(providers);
@@ -146,7 +161,7 @@ export class SettingsManager {
                         new Button(undefined, {
                             identifier: "settings-modal-cancel",
                             className: "prominent-button secondary centered",
-                            text: "Cancel",
+                            text: Translations.cancel,
                             onClick: () => {
                                 settingsModal.destroy();
                             }

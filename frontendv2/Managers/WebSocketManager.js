@@ -1,6 +1,7 @@
 import {API_ADAPTER} from "../api-adapter.js";
 import {Popup} from "../Components/Popup.js";
 import {ConversationManager} from "./ConversationManager.js";
+import {userService} from "../Services/UserService.js";
 
 export class WebSocketManager {
     static _socket;
@@ -15,7 +16,7 @@ export class WebSocketManager {
     static get identity() { return this._identity; }
     static set identity(value) {
         this._identity = value;
-        if (this._socket) this._socket.send(JSON.stringify({type: "identification", identifier: value}));
+        if (this._socket) this._socket.send(JSON.stringify({type: "identification", identifier: value, userId: userService.user.id ?? null}));
     }
 
     static get socket() { return this._socket; }

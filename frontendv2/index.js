@@ -14,10 +14,13 @@ import {ConversationManager} from "./Managers/ConversationManager.js";
 import {LlmProviderManager} from "./Managers/LLMProviderManager.js";
 import {WebSocketManager} from "./Managers/WebSocketManager.js";
 import {BodyText} from "./Components/BodyText.js";
+import {Translations} from "./Static/i18n.js";
 
 window.onload = async () => {
     let httpOk = await API_ADAPTER.ensureBackendConnection();
     let wsOk = false;
+
+    SettingsManager.loadSettings();
 
     try {
 
@@ -26,22 +29,21 @@ window.onload = async () => {
         wsOk = true;
     }
     catch (e) {
-        await new Modal("Could not connect to backend", [
+        await new Modal(Translations.could_not_connect_to_backend, [
             new BodyText(undefined, {
                 identifier: "http-status",
-                text: httpOk ? "HTTP: OK" : "HTTP: Unreachable",
+                text: httpOk ? Translations.http_ok : Translations.http_unreachable,
                 className: "http-status"
             }),
             new BodyText(undefined, {
                 identifier: "ws-status",
-                text: wsOk ? "WS: OK" : "WS: Disconnected",
+                text: wsOk ? Translations.ws_ok : Translations.ws_disconnected,
                 className: "ws-status"
             })
         ], { canBeClosedManually: false }).render();
         return;
     }
 
-    SettingsManager.loadSettings();
     SidebarService.setupSidebar();
     HeaderService.setupHeader();
 
@@ -49,26 +51,26 @@ window.onload = async () => {
     if (!UserService.isLoggedIn) {
         const emailInput = new TextInput(undefined, {
             identifier: "email",
-            placeholder: "Email Address",
+            placeholder: Translations.email_placeholder,
             censorInput: false
         });
         const passwordInput = new TextInput(undefined, {
             identifier: "password",
-            placeholder: "Password",
+            placeholder: Translations.password_placeholder,
             censorInput: true
         });
-        Popup.debug("Not logged in", "You need to login first to access this page");
-        const modal =  new Modal("You need to log in", [emailInput, passwordInput,
+        Popup.debug(Translations.not_logged_in, Translations.not_logged_in_message);
+        const modal =  new Modal(Translations.login_modal_title, [emailInput, passwordInput,
             new Button(undefined, {
                 icon: ICONS.CREATE,
                 identifier: "submit",
-                text: "Login",
+                text: Translations.login,
                 onClick: async () => {
                     const email = emailInput.value;
                     const password = passwordInput.value;
 
                     if (!email || !password) {
-                        Popup.error("Invalid Credentials", "Please enter valid Email and Password");
+                        Popup.error(Translations.invalid_credentials, Translations.invalid_credentials_message);
                     }
 
                     await UserService.login(emailInput.value, passwordInput.value);
@@ -88,7 +90,7 @@ window.onload = async () => {
     console.log(LlmProviderManager.Providers);
     if (Object.keys(LlmProviderManager.Providers).length === 0) {
         await SettingsManager.openSettingsModal({
-            selectedPage: "Provider Settings",
+            selectedPage: Translations.provider_settings,
             canBeClosedManually: false,
         });
     }
@@ -108,6 +110,6 @@ window.onload = async () => {
     }
 
     catch (e) {
-        Popup.debug("Initialization failed", e.message);
+        Popup.debug(Translations.initialization_failed, e.message);
     }
 }
