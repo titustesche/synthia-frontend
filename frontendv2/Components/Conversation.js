@@ -5,6 +5,7 @@ import {API_ADAPTER} from "../api-adapter.js";
 import {Message} from "./Message.js";
 import {ContextMenu} from "./ContextMenu.js";
 import {ICONS} from "../Static/Icons.js";
+import {Translations} from "../Static/i18n.js";
 
 export class Conversation {
     _container;
@@ -38,17 +39,17 @@ export class Conversation {
     _messages = [];
     get messages() { return this._messages; }
     set messages(value) {
-        console.log(value);
         if (value.length > 0) {
             this._messageContainer.innerHTML = "";
             for (let message of value) {
-                this._messageContainer.appendChild(message.createDomElement());
+                this._messageContainer.appendChild(message.getContainer());
             }
         }
         if (ConversationManager._activeConversation?.id === this.id) {
             ConversationManager.Empty = value.length <= 0;
         }
         this._messages = value;
+        this._updateHeight();
     }
 
     _owner;
@@ -79,7 +80,7 @@ export class Conversation {
             this.messageContainer.classList.add(`conversation-message-container`);
             this.messageContainer.id = `conversation-message-container-${this.id}`;
         } catch (e) {
-            Popup.debug("Could not parse conversation", e);
+            Popup.debug(Translations.could_not_parse_conversation, e);
         }
     }
 
@@ -99,34 +100,15 @@ export class Conversation {
         optionsMenu.innerHTML = ICONS.DOTTED_MENU;
         optionsMenu.addEventListener("click", (e) => {
             e.stopPropagation();
-            const menu = new ContextMenu(optionsMenu, {
-                sections: [
-                    {
-                        name: "basic",
-                        items: [
-                            {
-                                text: "Delete",
-                                onClick: async () => {
-                                    ConversationManager.DeleteConversation(this.id);
-                                }
-                            },
-                            {
-                                text: "Rename",
-                                onClick: async () => {
-                                    console.log(`Conversation ${this._id} needs to be renamed`);
-                                }
-                            }
-                        ]
-                    }
-                ]
-            });
-
-            menu.position = { x: e.clientX, y: e.clientY };
-            menu.render();
-        })
+            this.generateContextMenu(e.clientX, e.clientY);
+        });
         this._container.appendChild(optionsMenu);
 
         this._container.addEventListener("click", () => ConversationManager.SetActiveConversation(this.id));
+        this._container.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            this.generateContextMenu(e.clientX, e.clientY)
+        });
         return this._container;
     }
 
@@ -137,14 +119,15 @@ export class Conversation {
                 for (const message of messages) {
                     const newMessage = new Message(message);
                     this.messages.push(newMessage);
-                    this._messageContainer.appendChild(newMessage.createDomElement());
+                    this._messageContainer.appendChild(newMessage.getContainer());
                 }
             }
+            this._updateHeight();
             this.synchronized = true;
         }
 
         catch (e) {
-            Popup.debug("Could not fetch messages", e);
+            Popup.debug(Translations.could_not_fetch_messages, e);
         }
     }
 
@@ -152,9 +135,36 @@ export class Conversation {
         if (!this.synchronized) await this.fetchMessages();
         if (!this._container) this.createSidebarEntry();
 
-        console.log(this);
+        this._updateHeight(false);
         DomRegister.messageContainer.appendChild(this._messageContainer);
         this._container.classList.add("active");
+    }
+
+    generateContextMenu(x, y) {
+        const menu = new ContextMenu(document.body, {
+            sections: [
+                {
+                    name: "basic",
+                    items: [
+                        {
+                            text: Translations.delete,
+                            onClick: async () => {
+                                ConversationManager.DeleteConversation(this.id);
+                            }
+                        },
+                        {
+                            text: Translations.rename,
+                            onClick: async () => {
+                                console.log(`Conversation ${this._id} needs to be renamed`);
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        menu.position = { x, y };
+        menu.render();
     }
 
     unload() {
@@ -164,5 +174,23 @@ export class Conversation {
 
     delete() {
         this._container.remove();
+    }
+
+    _updateHeight(smooth = true) {
+        const lastMessage = this.messages.length > 0 ? this.messages[this.messages.length - 1].getContainer() : undefined;
+        if (lastMessage) {
+            // Use requestAnimationFrame to ensure the element is rendered before measuring
+            requestAnimationFrame(() => {
+                const containerHeight = this._messageContainer.clientHeight;
+                const lastMessageHeight = lastMessage.offsetHeight;
+                const defaultPadding = this._messageContainer.style.padding;
+                const paddingBottom = Math.max(containerHeight - lastMessageHeight, 0);
+                this._messageContainer.style.paddingBottom = `calc(${paddingBottom - defaultPadding}px - 1rem)`;
+                this._messageContainer.scrollTo({
+                    top: this._messageContainer.scrollHeight,
+                    behavior: smooth ? "smooth" : "auto"
+                });
+            });
+        }
     }
 }
