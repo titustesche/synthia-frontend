@@ -34,6 +34,11 @@
     --background-color: hsl(from var(--accent-color) calc(h - 10) calc(s * 0.2) 95%);
     --dark-background-color: hsl(from var(--accent-color) calc(h - 20) calc(s * 0.25) 91%);
 
+    --indicator-red: #ff9999;
+    --indicator-green: #99ff99;
+    --indicator-red-background: #ffcccc;
+    --indicator-green-background: #ccffcc;
+
     --background-gradient: radial-gradient(circle at 20% 20%, var(--tertiary-accent), var(--light-background-color) 70%);
 
     --text-color: #1e1e1e;
@@ -70,6 +75,11 @@
         --light-background-color: hsl(from var(--accent-color) calc(h + 10) calc(s * 0.2) 12%);
         --background-color: hsl(from var(--accent-color) calc(h - 10) calc(s * 0.2) 10%);
         --dark-background-color: hsl(from var(--accent-color) calc(h - 20) calc(s * 0.2) 7%);
+
+        --indicator-red: #ff4444;
+        --indicator-green: #44ff44;
+        --indicator-red-background: rgb(51 0 0 / 0.2);
+        --indicator-green-background: rgb(0 51 0 / 0.2);
 
         --text-color: #e1e1e1;
         --text-color-muted: #8c8c8c;
