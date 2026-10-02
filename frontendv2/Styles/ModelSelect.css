@@ -8,7 +8,8 @@
     display: grid;
     grid-template-areas:
     "name name name"
-    "provider provider parameters";
+    "provider provider parameters"
+    "capabilities capabilities capabilities";
     border-radius: var(--border-radius);
     cursor: pointer;
     background-color: var(--dark-background-color);
@@ -36,6 +37,23 @@
         grid-area: parameters;
         font-size: 1rem;
         color: var(--text-color-muted);
+        text-align: right;
+    }
+
+    .model-select-model-capabilities-container {
+        grid-area: capabilities;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .model-select-model-capability-chip {
+        color: var(--text-color);
+        padding: 0.25rem 0.5rem;
+        border: var(--border-width) solid var(--border-color);
+        border-radius: var(--round-border-radius);
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+        width: max-content;
     }
 }
 

@@ -84,6 +84,20 @@ export class ModelSelect {
             modelEntry.appendChild(modelParameterSize);
             this._modelEntries[model.name].parameterSizeContainer = modelParameterSize;
 
+            const capabilitiesContainer = document.createElement("div");
+            capabilitiesContainer.classList.add("model-select-model-capabilities-container");
+            modelEntry.appendChild(capabilitiesContainer);
+            this._modelEntries[model.name].capabilitiesContainer = capabilitiesContainer;
+
+            if (Array.isArray(model.capabilities) && model.capabilities.length > 0) {
+                for (let capability of model.capabilities) {
+                    const chip = document.createElement("div");
+                    chip.classList.add("model-select-model-capability-chip");
+                    chip.innerText = capability;
+                    capabilitiesContainer.appendChild(chip);
+                }
+            }
+
             this._gridLayout.appendChild(modelEntry);
         }
     }
